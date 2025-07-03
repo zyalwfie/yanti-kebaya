@@ -99,57 +99,78 @@
             <h2 class="h3 mb-3 text-black">Rincian Pengiriman</h2>
             <div class="p-3 p-lg-5 border bg-white">
 
-                <div class="form-group mb-3">
-                    <label for="recipient_name" class="text-black">Nama Penerima <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control <?= session('errors.recipient_name') ? 'is-invalid' : '' ?>" id="recipient_name" name="recipient_name" placeholder="Tulis namamu di sini" value="<?= old('recipient_name', user()->full_name ? user()->full_name : '') ?>">
-                    <?php if (session('errors.recipient_name')) : ?>
-                        <div class="invalid-feedback">
-                            <?= session('errors.recipient_name') ?>
-                        </div>
-                    <?php endif; ?>
-
+                <div class="row">
+                    <div class="col-12 col-md-6 form-group mb-3">
+                        <label for="recipient_name" class="text-black">Nama Penerima <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control <?= session('errors.nama_penyewa') ? 'is-invalid' : '' ?>" id="recipient_name" name="nama_penyewa" placeholder="Tulis namamu di sini" value="<?= old('nama_penyewa', user()->full_name ? user()->full_name : user()->username) ?>">
+                        <?php if (session('errors.nama_penyewa')) : ?>
+                            <div class="invalid-feedback">
+                                <?= session('errors.nama_penyewa') ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="col-12 col-md-6 form-group mb-3 ">
+                        <label for="recipient_email" class="text-black">Surel</label>
+                        <input type="text" class="form-control <?= session('errors.surel_penyewa') ? 'is-invalid' : '' ?>" id="recipient_email" name="surel_penyewa" placeholder="Tulis surelmu di sini" value="<?= old('surel_penyewa', user()->email) ?>">
+                        <?php if (session('errors.surel_penyewa')) : ?>
+                            <div class="invalid-feedback">
+                                <?= session('errors.surel_penyewa') ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
-                <div class="form-group mb-3 ">
-                    <label for="recipient_email" class="text-black">Surel</label>
-                    <input type="text" class="form-control <?= session('errors.recipient_email') ? 'is-invalid' : '' ?>" id="recipient_email" name="recipient_email" placeholder="Tulis surelmu di sini" value="<?= old('recipient_email', user()->email) ?>">
-                    <?php if (session('errors.recipient_email')) : ?>
-                        <div class="invalid-feedback">
-                            <?= session('errors.recipient_email') ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-
                 <div class="form-group mb-3">
-                    <label for="street_address" class="text-black">Alamat Penerima <span class="text-danger">*</span></label>
-                    <textarea type="text" class="form-control <?= session('errors.street_address') ? 'is-invalid' : '' ?>" id="street_address" name="street_address" placeholder="Tulis alamatmu di sini" rows="5"><?= old('street_address') ?></textarea>
-                    <?php if (session('errors.street_address')) : ?>
+                    <label for="street_address" class="text-black">Alamat Pengiriman <span class="text-danger">*</span></label>
+                    <textarea type="text" class="form-control <?= session('errors.alamat_pengiriman') ? 'is-invalid' : '' ?>" id="street_address" name="alamat_pengiriman" placeholder="Tulis alamatmu di sini" rows="5"><?= old('alamat_pengiriman') ?></textarea>
+                    <?php if (session('errors.alamat_pengiriman')) : ?>
                         <div class="invalid-feedback">
-                            <?= session('errors.street_address') ?>
+                            <?= session('errors.alamat_pengiriman') ?>
                         </div>
                     <?php endif; ?>
                 </div>
 
                 <div class="form-group mb-3">
                     <label for="recipient_phone" class="text-black">No. Telepon <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control <?= session('errors.recipient_phone') ? 'is-invalid' : '' ?>" id="recipient_phone" name="recipient_phone" placeholder="Tulis nomor teleponmu di sini" aria-describedby="phoneHelp" value="<?= old('recipient_phone') ?>">
-                    <?php if (session('errors.recipient_phone')) : ?>
+                    <input type="text" class="form-control <?= session('errors.no_telepon_penyewa') ? 'is-invalid' : '' ?>" id="recipient_phone" name="no_telepon_penyewa" placeholder="Tulis nomor teleponmu di sini" aria-describedby="phoneHelp" value="<?= old('no_telepon_penyewa') ?>">
+                    <?php if (session('errors.no_telepon_penyewa')) : ?>
                         <div class="invalid-feedback">
-                            <?= session('errors.recipient_phone') ?>
+                            <?= session('errors.no_telepon_penyewa') ?>
                         </div>
                     <?php endif; ?>
                     <div id="phoneHelp" class="form-text">Nomor telepon harus format Indonesia yang valid (contoh: 08123456789, +628123456789, 628123456789).</div>
                 </div>
 
+                <div class="row">
+                    <div class="col-12 col-md-6 form-group mb-3">
+                        <label for="rent_date" class="text-black">Tanggal Sewa <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control <?= session('errors.tanggal_sewa') ? 'is-invalid' : '' ?>" id="rent_date" name="tanggal_sewa" placeholder="Tulis namamu di sini" value="<?= old('tanggal_sewa') ?>">
+                        <?php if (session('errors.tanggal_sewa')) : ?>
+                            <div class="invalid-feedback">
+                                <?= session('errors.tanggal_sewa') ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="col-12 col-md-6 form-group mb-3 ">
+                        <label for="return_date" class="text-black">Tanggal Pengembalian <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control <?= session('errors.tanggal_kembali') ? 'is-invalid' : '' ?>" id="return_date" name="tanggal_kembali" placeholder="Tulis surelmu di sini" value="<?= old('tanggal_kembali') ?>" disabled>
+                        <?php if (session('errors.tanggal_kembali')) : ?>
+                            <div class="invalid-feedback">
+                                <?= session('errors.tanggal_kembali') ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="notes" class="text-black">Catatan</label>
-                    <textarea name="notes" id="notes" rows="5" name="notes" class="form-control" placeholder="Tulis catatanmu di sini..."><?= old('notes') ?></textarea>
+                    <textarea name="catatan" id="notes" rows="5" class="form-control" placeholder="Tulis catatanmu di sini..."><?= old('notes') ?></textarea>
                 </div>
 
             </div>
         </div>
 
-        <input type="hidden" name="total_price" value="<?= $cartsTotalAmount ?>">
+        <input type="hidden" name="total_bayar" value="<?= $cartsTotalAmount ?>">
 
         <div class="col-12 col-lg-5">
             <div class="row">
@@ -178,19 +199,19 @@
                         </table>
 
                         <div class="border p-3 mb-4">
-                            <h3 class="h6 mb-0"><a class="d-block" data-bs-toggle="collapse" href="#collapsebank" role="button" aria-expanded="false" aria-controls="collapsebank">Transfer ke nomor rekening di bawah</a></h3>
+                            <h3 class="h6 mb-0"><a class="d-block" data-bs-toggle="collapse" href="#collapsebank" role="button" aria-expanded="false" aria-controls="collapsebank">Transfer ke nomor <i>e-wallet</i> di bawah</a></h3>
 
                             <div class="collapse" id="collapsebank">
                                 <div class="pt-4 pb-2">
                                     <div class="d-flex gap-4 align-items-center">
-                                        <img src="<?= base_url('img/mandiri.svg') ?>" alt="Bank Mandiri" width="100">
+                                        <img src="<?= base_url('img/dana.svg') ?>" alt="Dana" width="100">
                                         <div class="d-flex gap-3 align-items-center">
                                             <div class="d-flex flex-column">
-                                                <p class="fs-5 fw-bold m-0" id="mandiriBankAccount">1610012697434</p>
-                                                <p class="mb-0">atas nama Lingga Jati</p>
+                                                <p class="fs-5 fw-bold m-0" id="danaAccount">082339544560</p>
+                                                <p class="mb-0">a.n M. Arifin</p>
                                             </div>
-                                            <button type="button" id="mandiriCopyBtn" onclick="copyToClipboard('mandiriCopyIcon', 'mandiriBankAccount')">
-                                                <i class="bi bi-clipboard" id="mandiriCopyIcon"></i>
+                                            <button type="button" id="danaCopyBtn" onclick="copyToClipboard('danaCopyIcon', 'danaAccount')">
+                                                <i class="bi bi-clipboard" id="danaCopyIcon"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -231,6 +252,14 @@
         <i class="bi bi-exclamation-circle-fill"></i>
         <div>
             <?= session('failed') ?>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php elseif (session()->has('empty_cart')) : ?>
+    <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <div>
+            <?= session('empty_cart') ?>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -1214,7 +1243,7 @@
         background: rgba(59, 93, 80, 0.2);
     }
 
-    #mandiriCopyBtn {
+    #danaCopyBtn {
         width: 40px;
         height: 40px;
         border: 1px solid var(--accent-color);
@@ -1224,7 +1253,7 @@
         transition: .1s linear;
     }
 
-    #mandiriCopyBtn:hover {
+    #danaCopyBtn:hover {
         background-color: var(--accent-color);
         color: var(--contrast-color);
     }
@@ -1281,5 +1310,25 @@
             document.body.removeChild(textArea);
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const rentDate = document.getElementById('rent_date');
+        const returnDate = document.getElementById('return_date');
+        function handleRentDateChange() {
+            if (rentDate.value) {
+                returnDate.disabled = false;
+                returnDate.min = rentDate.value;
+                if (returnDate.value && returnDate.value < rentDate.value) {
+                    returnDate.value = '';
+                }
+            } else {
+                returnDate.disabled = true;
+                returnDate.value = '';
+                returnDate.removeAttribute('min');
+            }
+        }
+        rentDate.addEventListener('change', handleRentDateChange);
+        handleRentDateChange();
+    });
 </script>
 <?= $this->endSection(); ?>

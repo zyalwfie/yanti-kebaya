@@ -11,9 +11,9 @@
             <div class="card-body">
                 <div class="d-md-flex align-items-center justify-content-between mb-4">
                     <div>
-                        <h4 class="card-title">Preview Laporan Penjualan</h4>
+                        <h4 class="card-title">Preview Laporan Penyewaan</h4>
                         <p class="card-subtitle">
-                            Pratinjau laporan penjualan sebelum diekspor
+                            Pratinjau laporan penyewaan sebelum diekspor
                         </p>
                     </div>
                     <div class="d-flex align-items-center">
@@ -57,7 +57,7 @@
                                                 <input type="hidden" name="end_date" value="<?= $endDate ?>">
                                             <?php endif; ?>
                                             <button type="submit" class="btn btn-primary">
-                                                <i class="ti ti-file-text me-1"></i> Ekspor PDF
+                                                <i class="bi bi-filetype-pdf me-1"></i> Ekspor PDF
                                             </button>
                                         </form>
                                     </div>
@@ -91,17 +91,17 @@
                                 <?php foreach ($orders as $index => $order): ?>
                                     <tr>
                                         <td><?= $index + 1 ?></td>
-                                        <td><?= date('d M Y', strtotime($order['created_at'])) ?></td>
-                                        <td><?= htmlspecialchars($order['recipient_name']) ?></td>
-                                        <td><?= htmlspecialchars($order['recipient_email']) ?></td>
-                                        <td>Rp<?= number_format($order['total_price'], 0, ',', '.') ?></td>
+                                        <td><?= date('d M Y', strtotime($order['waktu_dibuat'])) ?></td>
+                                        <td><?= htmlspecialchars($order['nama_penyewa']) ?></td>
+                                        <td><?= htmlspecialchars($order['surel_penyewa']) ?></td>
+                                        <td>Rp<?= number_format($order['total_bayar'], 0, ',', '.') ?></td>
                                         <td>
                                             <span class="badge <?php
-                                                                if ($order['status'] === 'tertunda') : ?>text-bg-warning 
-                                                <?php elseif ($order['status'] === 'berhasil') : ?>text-bg-success 
+                                                                if ($order['status_pembayaran'] === 'tertunda') : ?>text-bg-warning 
+                                                <?php elseif ($order['status_pembayaran'] === 'berhasil') : ?>text-bg-success 
                                                 <?php else: ?>text-bg-danger
                                                 <?php endif; ?> text-capitalize">
-                                                <?= $order['status'] ?>
+                                                <?= $order['status_pembayaran'] ?>
                                             </span>
                                         </td>
                                     </tr>

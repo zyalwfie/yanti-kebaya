@@ -5,11 +5,14 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\KategoriModel;
 use App\Models\KebayaModel;
+use App\Models\KebayaPesananModel;
 use App\Models\KeranjangModel;
+use App\Models\PembayaranModel;
+use App\Models\SewaModel;
 
 class LandingController extends BaseController
 {
-    protected $db, $kategoriModel, $kebayaModel, $keranjangModel, $cartsTotalAmount;
+    protected $db, $kategoriModel, $kebayaModel, $keranjangModel, $sewaModel, $kebayaPesananModel, $pembayaranModel, $cartsTotalAmount;
 
     public function __construct()
     {
@@ -17,6 +20,9 @@ class LandingController extends BaseController
         $this->kategoriModel = new KategoriModel();
         $this->kebayaModel = new KebayaModel();
         $this->keranjangModel = new KeranjangModel();
+        $this->sewaModel = new SewaModel();
+        $this->kebayaPesananModel = new KebayaPesananModel();
+        $this->pembayaranModel = new PembayaranModel();
     }
     
     public function index()
@@ -178,6 +184,164 @@ class LandingController extends BaseController
         if ($cart && $cart['id_pengguna'] === user()->id) {
             $this->keranjangModel->delete($cartId);
         }
-        return redirect()->route('landing.cart.index');
+        return redirect()->route('landing.cart.index')->with('success', 'Baju dihapus dari keranjang!');
+    }
+
+    public function paymentCreate()
+    {
+        $carts = $this->keranjangModel->where('id_pengguna', user()->id)->findAll();
+        $postData = $this->request->getPost();
+
+        // dd($postData);
+
+        if (!$this->validateData($postData, $this->sewaModel->getValidationRules(), $this->sewaModel->validationMessages)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        } elseif (!$carts) {
+            return redirect()->back()->withInput()->with('empty_cart', 'Tidak ada apa-apa di dalam keranjang!');
+        }
+
+        $postData['id_pengguna'] = user()->id;
+        $uniqCode = strtoupper(uniqid('#'));
+        $postData['kode_sewa'] = $uniqCode;
+        $this->sewaModel->save($postData);
+        $order = $this->sewaModel->orderBy('waktu_dibuat', 'DESC')->first();
+
+        if (isset($postData['product_id'], $postData['quantity'])) {
+            foreach ($postData['product_id'] as $idx => $productId) {
+                $quantity = isset($postData['quantity'][$idx]) ? $postData['quantity'][$idx] : 1;
+                $this->kebayaPesananModel->save([
+                    'id_sewa' => $order['id_sewa'],
+                    'id_kebaya' => $productId,
+                    'kuantitas' => $quantity
+                ]);
+            }
+        }
+
+        $this->keranjangModel->where('id_pengguna', user()->id)->delete();
+        $orderId = [
+            'id_sewa' => $order['id_sewa']
+        ];
+        $paymentResult = $this->pembayaranModel->save($orderId);
+
+        if ($paymentResult) {
+            return redirect()->route('landing.cart.payment.index', [$order['id_sewa']])->with('success', 'Pesanan telah dibuat!');
+        } else {
+            return redirect()->back()->with('failed', 'Pesanan gagal dibuat!');
+        }
+    }
+
+    public function payment($orderId)
+    {
+        $order = $this->sewaModel->where('id_sewa', $orderId)->first();
+        $payment = $this->pembayaranModel->where('id_sewa', $order['id_sewa'])->first();
+
+        if (!$order) {
+            return redirect()->back()->with('no_order', 'Pesanan belum dibuat');
+        }
+
+        if ($payment && $payment['bukti_pembayaran']) {
+            return redirect()->route('landing.cart.payment.done');
+        }
+
+        $data = [
+            'pageTitle' => 'Tektok Adventure | Pembayaran',
+            'cartsTotalCount' => ((!logged_in()) ? 0 : $this->keranjangModel->where('id_pengguna', user()->id)->countAllResults()),
+            'order_id' => $order['id_sewa']
+        ];
+
+        return view('landing/payment', $data);
+    }
+
+    public function paymentUpload()
+    {
+        $file = $this->request->getFile('bukti_pembayaran');
+        $orderId = $this->request->getPost('id_sewa');
+        $uriString = $this->request->getPost('uri_string');
+        $errors = [];
+
+        if ($file->isValid()) {
+            $mimeType = $file->getMimeType();
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+            if (!in_array($mimeType, $allowedTypes)) {
+                $errors['proof_of_payment'] = 'File harus berupa gambar (jpg, jpeg, png) atau PDF.';
+            } elseif ($file->getSize() > 2097152) {
+                $errors['proof_of_payment'] = 'Ukuran file maksimal 2MB.';
+            }
+        } else {
+            $errors['proof_of_payment'] = 'Bukti pembayaran harus diunggah!';
+        }
+
+        if (!empty($errors)) {
+            return redirect()->back()->withInput()->with('errors', $errors);
+        }
+
+        $newName = $file->getRandomName();
+        $file->move(FCPATH . 'img/product/proof/', $newName);
+
+        $payment = $this->pembayaranModel->where('id_sewa', $orderId)->first();
+        if ($payment) {
+            $this->pembayaranModel->update($payment['id_pembayaran'], [
+                'bukti_pembayaran' => $newName
+            ]);
+        }
+
+        if ($uriString === 'dashboard/user/orders/show/' . $orderId) {
+            return redirect()->back()->with('proofed', 'File bukti berhasil diunggah!');
+        }
+
+        return redirect()->route('landing.cart.payment.done');
+    }
+
+    public function paymentUpdate()
+    {
+        dd($this->request->getFile('proof_of_payment'));
+
+        $file = $this->request->getFile('proof_of_payment');
+        $orderId = $this->request->getPost('order_id');
+        $errors = [];
+
+        if ($file->isValid()) {
+            $mimeType = $file->getMimeType();
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (!in_array($mimeType, $allowedTypes)) {
+                $errors['proof_of_payment'] = 'File harus berupa gambar (jpg, jpeg, png) atau PDF.';
+            } elseif ($file->getSize() > 2097152) {
+                $errors['proof_of_payment'] = 'Ukuran file maksimal 2MB.';
+            }
+        } else {
+            $errors['proof_of_payment'] = 'Bukti pembayaran harus diunggah!';
+        }
+
+        if (!empty($errors)) {
+            return redirect()->back()->withInput()->with('errors', $errors);
+        }
+
+        $newName = $file->getRandomName();
+        $file->move(FCPATH . 'img/product/proof', $newName);
+
+        $payment = $this->pembayaranModel->where('order_id', $orderId)->first();
+        if ($payment) {
+            if (!empty($payment['proof_of_payment'])) {
+                $oldPath = FCPATH . 'img/product/proof/' . $payment['proof_of_payment'];
+                if (file_exists($oldPath)) {
+                    @unlink($oldPath);
+                }
+            }
+            $this->pembayaranModel->update($payment['id'], [
+                'proof_of_payment' => $newName
+            ]);
+        }
+
+        return redirect()->back()->with('proofed', 'File bukti berhasil diperbarui!');
+    }
+
+    public function paymentDone()
+    {
+        $data = [
+            'pageTitle' => 'Nuansa | Pembayaran',
+            'cartsTotalCount' => ((!logged_in()) ? 0 : $this->keranjangModel->where('id_pengguna', user()->id)->countAllResults()),
+        ];
+
+        return view('landing/thanks', $data);
     }
 }

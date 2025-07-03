@@ -52,7 +52,7 @@
                     </div>
                 </div>
                 <div class="pt-3 mb-7 d-flex align-items-center">
-                    <span class="btn btn-secondary rounded-circle round-48 hstack justify-content-center">
+                    <span class="btn btn-info rounded-circle round-48 hstack justify-content-center">
                         <i class="ti ti-help fs-6"></i>
                     </span>
                     <div class="ms-3">
@@ -68,7 +68,7 @@
     </div>
     <div class="col-lg-4">
         <div class="card pt-4">
-            <img src="<?= base_url('img/profile/user-1.svg') ?>" alt="<?= user()->username ?>" style="width: 81%; margin: auto;">
+            <img src="<?= base_url('img/profile/') . user()->avatar ?>" alt="<?= user()->username ?>" style="width: 81%; margin: auto;">
             <div class="card-body">
                 <div class="d-flex gap-2 justify-content-center align-items-center">
                     <div>
@@ -122,23 +122,23 @@
                                                 <img src="<?= base_url('img/profile/') . $order->avatar ?>" class="rounded-circle" width="40"
                                                     alt="flexy" />
                                                 <div class="ms-3">
-                                                    <h6 class="mb-0 fw-bolder"><?= $order->recipient_name ?></h6>
-                                                    <span class="text-muted"><?= $order->recipient_phone ?></span>
+                                                    <h6 class="mb-0 fw-bolder"><?= $order->nama_penyewa ?></h6>
+                                                    <span class="text-muted"><?= $order->no_telepon_penyewa ?></span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td class="px-0">
                                             <span
-                                                <?php if ($order->order_status === 'berhasil') : ?>
+                                                <?php if ($order->status_pembayaran === 'berhasil') : ?>
                                                 class="badge bg-success"
-                                                <?php elseif ($order->order_status === 'tertunda') : ?>
+                                                <?php elseif ($order->status_pembayaran === 'tertunda') : ?>
                                                 class="badge bg-warning"
                                                 <?php else : ?>
                                                 class="badge bg-danger"
-                                                <?php endif; ?>><?= $order->order_status ?></span>
+                                                <?php endif; ?>><?= $order->status_pembayaran ?></span>
                                         </td>
                                         <td class="px-0 text-dark fw-medium text-end">
-                                            Rp<?= number_format($order->total_price, '0', '.', ',') ?>
+                                            Rp<?= number_format($order->total_bayar, '0', '.', ',') ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

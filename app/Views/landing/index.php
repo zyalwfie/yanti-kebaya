@@ -13,7 +13,7 @@
             <div class="col-lg-8">
                 <h2 style="text-shadow: 1px 1px 3px #000000;" class="text-white display-4">Temukan Kebaya Istimewa</h2>
                 <p style="text-shadow: 1px 1px 3px #000000;" class="text-white">Koleksi kebaya premium untuk pengantin, wisuda & acara penting lainnya</p>
-                <a href="#produk" class="btn-get-started">Lihat Koleksi</a>
+                <a href="<?= route_to('landing.shop.index') ?>" class="btn-get-started">Lihat Koleksi</a>
             </div>
         </div>
     </div>

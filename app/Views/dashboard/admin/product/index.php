@@ -12,7 +12,12 @@
         $filteredProducts = $products;
         if ($search) {
             $filteredProducts = array_filter($products, function ($product) use ($search) {
-                return stripos($product['product_name'], $search) !== false;
+                return stripos($product['nama_kebaya'], $search) !== false;
+            });
+        }
+        if ($search) {
+            $filteredProducts = array_filter($products, function ($product) use ($search) {
+                return stripos($product['nama_kategori'], $search) !== false;
             });
         }
 
@@ -33,13 +38,16 @@
                     </p>
                 </div>
                 <div class="d-flex align-items-center gap-2">
+                    <a href="<?= route_to('admin.products.index') ?>" class="btn btn-outline-warning">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
                     <form method="get" class="position-relative">
-                        <input class="form-control me-1" type="text" name="q" placeholder="Cari produk" aria-label="Search" value="<?= isset($_GET['q']) ? esc($_GET['q']) : '' ?>" />
+                        <input class="form-control me-1" type="text" name="q" placeholder="Cari kebaya" aria-label="Search" value="<?= isset($_GET['q']) ? esc($_GET['q']) : '' ?>" />
                         <button class="search-button position-absolute" type="submit">
                             <i class="ti ti-search"></i>
                         </button>
                     </form>
-                    <a href="<?= route_to('admin.products.create') ?>" class="btn btn-secondary">Tambah Produk</a>
+                    <a href="<?= route_to('admin.products.create') ?>" class="btn btn-secondary">Tambah Kebaya</a>
                 </div>
             </div>
             <div class="table-responsive m-4">
@@ -47,7 +55,10 @@
                     <thead>
                         <tr>
                             <th scope="col" class="px-0 text-muted">
-                                Produk
+                                No.
+                            </th>
+                            <th scope="col" class="px-0 text-muted">
+                                Kebaya
                             </th>
                             <th scope="col" class="px-0 text-muted">
                                 Harga
@@ -64,26 +75,28 @@
                         <?php if (!$paginatedProducts) : ?>
                             <tr>
                                 <th colspan="4" class="text-center">
-                                    Produk tidak ditemukan.
+                                    Kebaya tidak ditemukan. <a href="<?= route_to('admin.products.index') ?>" class="text-secondary">Kembali</a>
                                 </th>
                             </tr>
                         <?php else : ?>
+                            <?php $index = 1; ?>
                             <?php foreach ($paginatedProducts as $product) : ?>
                                 <tr>
+                                    <td><?= $index++ ?></td>
                                     <td class="px-0">
                                         <div class="d-flex align-items-center gap-2">
-                                            <img src="<?= base_url('img/product/uploads/') . $product['image'] ?>" style="width: 50px; height: 50px; object-fit: cover;"
-                                                alt="<?= $product['product_name'] ?>" />
+                                            <img src="<?= base_url('img/product/uploads/') . $product['foto'] ?>" style="width: 50px; height: 50px; object-fit: cover;"
+                                                alt="<?= $product['nama_kebaya'] ?>" />
                                             <div class="ms-3">
-                                                <h6 class="mb-0 fw-bolder"><?= $product['product_name'] ?></h6>
-                                                <span class="text-muted"><?= $product['category_name'] ?></span>
+                                                <h6 class="mb-0 fw-bolder"><?= $product['nama_kebaya'] ?></h6>
+                                                <span class="text-muted"><?= $product['nama_kategori'] ?></span>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-0">Rp<?= number_format($product['price'], '0', ',', '.') ?></td>
+                                    <td class="px-0">Rp<?= number_format($product['harga_sewa'], '0', ',', '.') ?></td>
                                     <td class="px-0">
                                         <?php
-                                        $stock = $product['stock'];
+                                        $stock = $product['stok'];
                                         $badgeClass = 'text-info';
                                         if ($stock <= 5) {
                                             $badgeClass = 'text-danger';
@@ -102,18 +115,18 @@
                                             class="badge bg-info btn"
                                             data-bs-toggle="modal"
                                             data-bs-target="#detailModal"
-                                            data-category_name="<?= $product['category_name'] ?>"
-                                            data-is_featured="<?= $product['is_featured'] ?>"
-                                            data-image="<?= base_url('img/product/uploads/' . $product['image']) ?>"
-                                            data-name="<?= esc($product['product_name']) ?>"
-                                            data-description="<?= esc($product['product_description']) ?>"
-                                            data-discount="<?= esc($product['discount']) ?>"
-                                            data-price="<?= esc($product['price']) ?>"
-                                            data-stock="<?= esc($product['stock']) ?>">
+                                            data-category_name="<?= $product['nama_kategori'] ?>"
+                                            data-is_featured="<?= $product['rekomendasi'] ?>"
+                                            data-image="<?= base_url('img/product/uploads/' . $product['foto']) ?>"
+                                            data-name="<?= esc($product['nama_kebaya']) ?>"
+                                            data-description="<?= esc($product['deskripsiKebaya']) ?>"
+                                            data-status="<?= esc($product['status']) ?>"
+                                            data-price="<?= esc($product['harga_sewa']) ?>"
+                                            data-stock="<?= esc($product['stok']) ?>">
                                             Lihat
                                         </button>
-                                        <a class="badge bg-warning" href="<?= route_to('admin.products.edit', $product['product_slug']) ?>">Ubah</a>
-                                        <button id="deleteButton" type="button" class="badge bg-danger btn" data-bs-toggle="modal" data-bs-target="#confirmModal" data-product_slug="<?= $product['product_slug'] ?>">Hapus</button>
+                                        <a class="badge bg-warning" href="<?= route_to('admin.products.edit', $product['slug']) ?>">Ubah</a>
+                                        <button id="deleteButton" type="button" class="badge bg-danger btn" data-bs-toggle="modal" data-bs-target="#confirmModal" data-slug="<?= $product['slug'] ?>">Hapus</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -180,7 +193,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <img id="previewImg" src="<?= base_url('img/product/uploads/default.svg') ?>" alt="Image" class="w-100 img-thumbnail mb-3">
+                <img id="previewImg" src="<?= base_url('img/product/uploads/') . $product['foto'] ?>" alt="Image" class="w-100 img-thumbnail mb-3">
                 <div class="mb-3">
                     <label for="name" class="form-label">Nama Produk</label>
                     <input class="form-control" id="name" type="text" disabled>
@@ -191,18 +204,8 @@
                         <input class="form-control" id="stock" type="number" disabled>
                     </div>
                     <div class="col">
-                        <label for="price" class="form-label">Harga Produk</label>
+                        <label for="price" class="form-label">Harga Sewa</label>
                         <input class="form-control" id="price" type="text" disabled>
-                    </div>
-                </div>
-                <div class="mb-3 row">
-                    <div class="col">
-                        <label for="price_discount" class="form-label">Harga Diskon</label>
-                        <input type="text" class="form-control" id="discount_price" disabled>
-                    </div>
-                    <div class="col">
-                        <label for="discount" class="form-label">Diskon</label>
-                        <input class="form-control" id="discount" type="text" disabled>
                     </div>
                 </div>
                 <div class="mb-3 row">
@@ -229,10 +232,10 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="confirmModalLabel">Yakin ingin menghapus produk ini?</h1>
+                <h1 class="modal-title fs-5" id="confirmModalLabel">Yakin ingin menghapus kebaya ini?</h1>
             </div>
             <div class="modal-body">
-                Tindakan ini akan menghapus produk dari sistem secara permanen dan tidak dapat dibatalkan.
+                Tindakan ini akan menghapus kebaya dari sistem secara permanen dan tidak dapat dibatalkan.
                 Pastikan Anda benar-benar yakin sebelum melanjutkan.
             </div>
             <div class="modal-footer">
@@ -249,7 +252,7 @@
 <?= $this->section('head_css'); ?>
 <style>
     button[type=submit]:hover {
-        color: white;
+        color: #462918;
     }
 
     .badge.bg-info:hover {
@@ -292,9 +295,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const detailModal = document.getElementById('detailModal');
         const productName = detailModal.querySelector('#name');
-        const discount = detailModal.querySelector('#discount');
         const price = detailModal.querySelector('#price');
-        const priceAfterDiscount = detailModal.querySelector('#discount_price')
         const stock = detailModal.querySelector('#stock');
         const image = detailModal.querySelector('#previewImg');
         const category = detailModal.querySelector('#category_name')
@@ -304,16 +305,9 @@
         document.querySelectorAll('#btn-detail-modal').forEach(btn => {
             btn.addEventListener('click', function() {
                 productName.value = this.dataset.name;
-                discount.value = `${this.dataset.discount}%`;
 
                 const formattedPrice = formatRupiah(this.dataset.price)
                 price.value = formattedPrice;
-
-                const discountAmount = this.dataset.price * (this.dataset.discount / 100);
-                const discountPrice = this.dataset.price - discountAmount
-
-                const formattedDiscountPrice = formatRupiah(discountPrice);
-                priceAfterDiscount.value = formattedDiscountPrice;
 
                 stock.value = this.dataset.stock;
                 image.src = this.dataset.image;
@@ -330,7 +324,8 @@
 
         document.querySelectorAll('#deleteButton').forEach(function(deleteBtn) {
             deleteBtn.addEventListener('click', function() {
-                const productSlug = this.dataset.product_slug;
+                const productSlug = this.dataset.slug;
+                console.log(productSlug);
                 const formModal = document.querySelector('#formModal');
                 formModal.onsubmit = function(e) {
                     e.preventDefault();

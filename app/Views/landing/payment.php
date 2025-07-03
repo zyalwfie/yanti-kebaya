@@ -27,16 +27,16 @@
             <h2 class="h3 mb-3 text-black">Bukti Pembayaran</h2>
             <div class="p-3 p-lg-5 border bg-white">
                 <div class="mb-4">
-                    <div id="previewImg" class="mb-3"></div>
+                    <div id="previewImg" class="mb-3" style="cursor: pointer;"></div>
                     <label for="proof_of_payment" class="form-label">File Bukti Pembayaran</label>
-                    <input class="form-control <?= session('errors.proof_of_payment') ? 'is-invalid' : '' ?>" type="file" id="proof_of_payment" name="proof_of_payment" accept="image/*,application/pdf" onchange="previewProof(event)">
+                    <input class="form-control <?= session('errors.proof_of_payment') ? 'is-invalid' : '' ?>" type="file" id="proof_of_payment" name="bukti_pembayaran" accept="image/*,application/pdf" onchange="previewProof(event)">
                     <?php if (session('errors.proof_of_payment')) : ?>
                         <div class="invalid-feedback">
                             <?= session('errors.proof_of_payment') ?>
                         </div>
                     <?php endif; ?>
                 </div>
-                <input type="hidden" name="order_id" value="<?= $order_id ?>">
+                <input type="hidden" name="id_pesanan" value="<?= $order_id ?>">
                 <div class="d-flex justify-content-end align-items-center gap-2">
                     <a href="<?= base_url(route_to('landing.cart.payment.done')) ?>" class="btn btn-secondary">Lakukan Nanti</a>
                     <button type="submit" class="btn upload-btn">Unggah Bukti</button>
@@ -77,6 +77,8 @@
 
 <?= $this->section('foot_js'); ?>
 <script>
+    let viewer;
+
     function previewProof(event) {
         const file = event.target.files[0];
         const previewContainer = document.getElementById('previewImg');
@@ -88,7 +90,20 @@
             img.style.maxWidth = '100%';
             img.style.maxHeight = '300px';
             img.className = 'img-fluid border rounded';
+            img.setAttribute('data-original', img.src);
             previewContainer.appendChild(img);
+            if (viewer) viewer.destroy();
+            viewer = new Viewer(img, {
+                inline: false,
+                navbar: false
+            });
+        } else if (file.type === 'application/pdf') {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.target = '_blank';
+            link.textContent = 'Lihat PDF';
+            link.className = 'btn btn-primary';
+            previewContainer.appendChild(link);
         } else {
             previewContainer.innerHTML = '<span class="text-danger">File tidak didukung.</span>';
         }

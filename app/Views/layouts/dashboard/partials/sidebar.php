@@ -1,8 +1,9 @@
 <!-- Sidebar Start -->
 <aside class="left-sidebar">
     <div class="brand-logo d-flex align-items-center justify-content-between">
-        <a href="./index.html" class="text-nowrap logo-img">
-            <img src="<?= base_url('img/header-logo-light.png') ?>" alt="Tektok Adventure Logo" width="160" />
+        <a href="<?= in_groups('admin') ? route_to('admin.index') : route_to('user.index') ?>" class="text-nowrap logo-img d-flex align-items-center">
+            <img src="<?= base_url('img/logo.png') ?>" alt="Yanti Kebaya Logo" width="80" />
+            <h1 class="h4 mb-0">Yanti Kebaya</h1>
         </a>
         <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
             <i class="ti ti-x fs-6"></i>
@@ -67,9 +68,9 @@
                         href="<?= route_to('admin.products.index') ?>" aria-expanded="false">
                         <div class="d-flex align-items-center gap-3">
                             <span class="d-flex">
-                                <i class="ti ti-briefcase"></i>
+                                <i class="ti ti-shirt"></i>
                             </span>
-                            <span class="hide-menu">Produk</span>
+                            <span class="hide-menu">Kebaya</span>
                         </div>
 
                     </a>

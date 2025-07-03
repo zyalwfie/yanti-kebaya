@@ -12,10 +12,22 @@
                 <div class="d-md-flex align-items-center justify-content-between">
                     <?php
                     $category = $_GET['category'] ?? '';
+                    $tanggalSewa = $_GET['tanggal_sewa'] ?? '';
+                    $tanggalKembali = $_GET['tanggal_kembali'] ?? '';
                     $filteredOrder = $orders;
                     if ($category) {
                         $filteredOrder = array_filter($orders, function ($order) use ($category) {
-                            return stripos($order['status'], $category) !== false;
+                            return stripos($order['status_pembayaran'], $category) !== false;
+                        });
+                    }
+                    if ($tanggalSewa) {
+                        $filteredOrder = array_filter($filteredOrder, function ($order) use ($tanggalSewa) {
+                            return isset($order['tanggal_sewa']) && strpos($order['tanggal_sewa'], $tanggalSewa) === 0;
+                        });
+                    }
+                    if ($tanggalKembali) {
+                        $filteredOrder = array_filter($filteredOrder, function ($order) use ($tanggalKembali) {
+                            return isset($order['tanggal_kembali']) && strpos($order['tanggal_kembali'], $tanggalKembali) === 0;
                         });
                     }
                     ?>
@@ -26,14 +38,25 @@
                         </p>
                     </div>
                     <div class="d-flex gap-3 align-items-center">
-                        <div>Urutkan pesanan berdasarkan status</div>
-                        <form method="get" class="d-flex align-items-center justify-content-end gap-3" id="formEl">
-                            <select class="form-select" name="category" id="selectEl" aria-label="Status select">
-                                <option selected value="">Pilih status</option>
-                                <option value="berhasil" <?= $category === 'berhasil' ? 'selected' : '' ?>>Berhasil</option>
-                                <option value="tertunda" <?= $category === 'tertunda' ? 'selected' : '' ?>>Tertunda</option>
-                                <option value="gagal" <?= $category === 'gagal' ? 'selected' : '' ?>>Gagal</option>
-                            </select>
+                        <form method="get" class="d-flex align-items-end justify-content-end gap-3" id="formEl">
+                            <div>
+                                <label for="tanggal_sewa" class="form-label">Tanggal sewa</label>
+                                <input type="date" class="form-control" id="tanggal_sewa" name="tanggal_sewa" value="<?= esc($tanggalSewa) ?>">
+                            </div>
+                            <div>
+                                <label for="tanggal_kembali" class="form-label">Tanggal kembali</label>
+                                <input type="date" class="form-control" id="tanggal_kembali" name="tanggal_kembali" value="<?= esc($tanggalKembali) ?>">
+                            </div>
+                            <div>
+                                <label for="selectEl" class="form-label">Status</label>
+                                <select class="form-select" name="category" id="selectEl" aria-label="Status select">
+                                    <option selected value="">Pilih status</option>
+                                    <option value="berhasil" <?= $category === 'berhasil' ? 'selected' : '' ?>>Berhasil</option>
+                                    <option value="tertunda" <?= $category === 'tertunda' ? 'selected' : '' ?>>Tertunda</option>
+                                    <option value="gagal" <?= $category === 'gagal' ? 'selected' : '' ?>>Gagal</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Urutkan</button>
                         </form>
                     </div>
                 </div>
@@ -50,7 +73,7 @@
                         <thead>
                             <tr>
                                 <th scope="col" class="px-0 text-muted">
-                                    Nama Penerima
+                                    Nama Penyewa
                                 </th>
                                 <th scope="col" class="px-0 text-muted">
                                     Total Harga
@@ -67,7 +90,7 @@
                             <?php if (!$paginatedOrders) : ?>
                                 <tr>
                                     <th colspan="4" class="text-center">
-                                        Pesanan tidak ditemukan.
+                                        Pesanan tidak ditemukan. <a href="<?= route_to('admin.orders.index') ?>" class="text-secondary">Kembali</a>
                                     </th>
                                 </tr>
                             <?php else : ?>
@@ -76,17 +99,17 @@
                                         <td class="px-0">
                                             <div class="d-flex align-items-center">
                                                 <div>
-                                                    <h6 class="mb-0 fw-bolder"><?= $order['recipient_name'] ?></h6>
-                                                    <span class="text-muted"><?= $order['recipient_email'] ?></span>
+                                                    <h6 class="mb-0 fw-bolder"><?= $order['nama_penyewa'] ?></h6>
+                                                    <span class="text-muted"><?= $order['surel_penyewa'] ?></span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-0">Rp<?= number_format($order['total_price'], '0', '.', ',') ?></td>
+                                        <td class="px-0">Rp<?= number_format($order['total_bayar'], '0', '.', ',') ?></td>
                                         <td class="px-0">
-                                            <span class="badge <?php if ($order['status'] === 'tertunda') : ?>text-bg-warning <?php elseif ($order['status'] === 'berhasil') : ?>text-bg-success <?php else: ?>text-bg-danger<?php endif; ?> text-capitalize"><?= $order['status'] ?></span>
+                                            <span class="badge <?php if ($order['status_pembayaran'] === 'tertunda') : ?>text-bg-warning <?php elseif ($order['status_pembayaran'] === 'berhasil') : ?>text-bg-success <?php else: ?>text-bg-danger<?php endif; ?> text-capitalize"><?= $order['status_pembayaran'] ?></span>
                                         </td>
                                         <td class="px-0 text-dark fw-medium text-end">
-                                            <a href="<?= route_to('admin.orders.show', $order['id']) ?>" class="text-info">Lihat</a>
+                                            <a href="<?= route_to('admin.orders.show', $order['id_sewa']) ?>" class="text-info">Lihat</a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

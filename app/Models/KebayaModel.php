@@ -39,8 +39,41 @@ class KebayaModel extends Model
     protected $deletedField  = 'deleted_at';
 
     // Validation
-    protected $validationRules      = [];
-    protected $validationMessages   = [];
+    protected $validationRules      = [
+        'id_kebaya' => 'permit_empty',
+        'id_kategori' => 'required',
+        'slug' => 'required',
+        'nama_kebaya' => 'required|is_unique[kebaya.nama_kebaya,slug,{slug}]',
+        'deskripsi' => 'required',
+        'ukuran_tersedia' => 'required',
+        'harga_sewa' => 'required',
+        'stok' => 'required',
+        'status' => 'required',
+    ];
+    protected $validationMessages   = [
+        'id_kategori' => [
+            'required' => 'Kategori harus dipilih!',
+        ],
+        'nama_kebaya' => [
+            'required' => 'Nama kebaya harus diisi!',
+            'is_unique' => 'Nama kebaya sudah digunakan!'
+        ],
+        'deskripsi' => [
+            'required' => 'deskripsi harus diisi!',
+        ],
+        'ukuran_tersedia' => [
+            'required' => 'Ukuran harus dipilih!',
+        ],
+        'harga_sewa' => [
+            'required' => 'Harga harus ditentukan!',
+        ],
+        'stok' => [
+            'required' => 'Stok harus diisi!',
+        ],
+        'status' => [
+            'required' => 'Status harus diisi!',
+        ],
+    ];
     protected $skipValidation       = false;
     protected $cleanValidationRules = true;
 

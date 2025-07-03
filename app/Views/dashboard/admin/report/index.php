@@ -27,7 +27,7 @@
                 $endDate = $_GET['end_date'] ?? null;
 
                 $filteredOrders = array_filter($orders, function ($order) use ($startDate, $endDate) {
-                    $orderDate = strtotime($order['created_at']);
+                    $orderDate = strtotime($order['waktu_dibuat']);
 
                     if (!$startDate && !$endDate) return true;
 
@@ -43,7 +43,7 @@
                 });
 
                 $totalSales = array_reduce($filteredOrders, function ($carry, $order) {
-                    return $carry + $order['total_price'];
+                    return $carry + $order['total_bayar'];
                 }, 0);
 
                 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
@@ -62,7 +62,7 @@
                         </div>
                         <div class="col-md-4">
                             <label for="end_date" class="form-label">Tanggal Akhir</label>
-                            <input type="date" class="form-control" id="end_date" name="end_date" value="<?= htmlspecialchars($endDate ?? '') ?>">
+                            <input type="date" class="form-control" id="end_date" name="end_date" value="<?= htmlspecialchars($endDate ?? '') ?>" min="<?= htmlspecialchars($startDate ?? '') ?>">
                         </div>
                         <div class="col-md-4 d-flex align-items-end">
                             <button type="submit" class="btn btn-primary me-2">Urutkan</button>
@@ -72,7 +72,7 @@
                                                 'start_date' => $startDate,
                                                 'end_date' => $endDate
                                             ]) ?>" class="btn btn-success">
-                                    <i class="ti ti-file-text"></i> Pratinjau
+                                    <i class="bi bi-eye"></i> Pratinjau
                                 </a>
                             <?php endif; ?>
                         </div>
@@ -115,26 +115,26 @@
                                     <?php foreach ($paginatedOrders as $order) : ?>
                                         <tr>
                                             <td class="px-0">
-                                                <?= date('d M Y', strtotime($order['created_at'])) ?>
+                                                <?= date('d M Y', strtotime($order['waktu_dibuat'])) ?>
                                             </td>
                                             <td class="px-0">
                                                 <div class="d-flex align-items-center">
                                                     <div>
-                                                        <h6 class="mb-0 fw-bolder"><?= $order['recipient_name'] ?></h6>
-                                                        <span class="text-muted"><?= $order['recipient_email'] ?></span>
+                                                        <h6 class="mb-0 fw-bolder"><?= $order['nama_penyewa'] ?></h6>
+                                                        <span class="text-muted"><?= $order['surel_penyewa'] ?></span>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="px-0">Rp<?= number_format($order['total_price'], '0', '.', ',') ?></td>
+                                            <td class="px-0">Rp<?= number_format($order['total_bayar'], '0', '.', ',') ?></td>
                                             <td class="px-0">
                                                 <span class="badge <?php
-                                                                    if ($order['status'] === 'tertunda') : ?>text-bg-warning 
-                                                <?php elseif ($order['status'] === 'berhasil') : ?>text-bg-success 
+                                                                    if ($order['status_pembayaran'] === 'tertunda') : ?>text-bg-warning 
+                                                <?php elseif ($order['status_pembayaran'] === 'berhasil') : ?>text-bg-success 
                                                 <?php else: ?>text-bg-danger
-                                                <?php endif; ?> text-capitalize"><?= $order['status'] ?></span>
+                                                <?php endif; ?> text-capitalize"><?= $order['status_pembayaran'] ?></span>
                                             </td>
                                             <td class="px-0 text-dark fw-medium text-end">
-                                                <a href="<?= route_to('admin.orders.show', $order['id']) ?>" class="text-info">Lihat</a>
+                                                <a href="<?= route_to('admin.orders.show', $order['id_sewa']) ?>" class="text-info">Lihat</a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -172,10 +172,16 @@
             const endDateInput = document.getElementById('end_date');
 
             if (startDateInput && endDateInput) {
+                // Set min for end date on page load
+                if (startDateInput.value) {
+                    endDateInput.min = startDateInput.value;
+                }
                 startDateInput.addEventListener('change', function() {
                     endDateInput.min = this.value;
+                    if (endDateInput.value && endDateInput.value < this.value) {
+                        endDateInput.value = '';
+                    }
                 });
-
                 endDateInput.addEventListener('change', function() {
                     startDateInput.max = this.value;
                 });
