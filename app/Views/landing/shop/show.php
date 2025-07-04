@@ -30,9 +30,11 @@
                 <div class="small mb-1">Detail Produk</div>
                 <h1 class="display-5 fw-bolder"><?= $product['nama_kebaya'] ?></h1>
                 <div class="fs-5 mb-3">
-                    <span>Rp<?= number_format($product['harga_sewa'], '0', '.', ',') ?></span>
+                    <span class="fw-bold">Rp<?= number_format($product['harga_sewa'], '0', '.', ',') ?></span>
                     <span>/</span>
                     <small>Sisa stok <?= $product['stok'] ?></small>
+                    <span>/</span>
+                    <small>Ukuran yang tersedia <?= $product['ukuran_tersedia'] ?></small>
                 </div>
                 <p class="lead">
                     <?= $product['deskripsi'] ?>

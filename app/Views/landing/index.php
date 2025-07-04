@@ -202,8 +202,8 @@
 <section id="products" class="products section">
     <!-- Section Title -->
     <div class="container section-title" data-aos="fade-up">
-        <h2>Produk Kami</h2>
-        <p>Beragam pilihan ekspedisi untuk pengalaman petualangan tak terlupakan. Lihat lebih banyak <a href="<?= route_to('landing.shop.index') ?>" class="text-decoration-underline">di sini</a></p>
+        <h2>Koleksi Kebaya Kami</h2>
+        <p>Temukan keanggunan dalam setiap helai untuk momen paling berharga Anda. Jelajahi koleksi lengkapnya <a href="<?= route_to('landing.kebaya.index') ?>" class="text-decoration-underline">di sini</a>.</p>
     </div>
     <!-- End Section Title -->
 

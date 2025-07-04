@@ -254,6 +254,54 @@ class AdminController extends BaseController
         return redirect()->to($url)->with('success', 'Produk berhasil dihapus!');
     }
 
+    public function users()
+    {
+        $this->userBuilder->select('users.id as userId, email, full_name, username, avatar, active');
+        $this->userBuilder->join('auth_groups_users', 'auth_groups_users.user_id = users.id');
+        $this->userBuilder->where('auth_groups_users.group_id', 2);
+        $query = $this->userBuilder->get();
+        $users = $query->getResultArray();
+
+        $data = [
+            'index' => 1,
+            'pageTitle' => 'Dasbor | Admin | Pengguna',
+            'users' => $users
+        ];
+
+        return view('dashboard/admin/user/index', $data);
+    }
+
+    public function destroyUser($username)
+    {
+        $queryAuthGroupsUsers = $this->authGroupUserBuilder->get();
+        $authGroupsUsers = $queryAuthGroupsUsers->getResult();
+
+        $authGroupsUserId = [];
+
+        foreach ($authGroupsUsers as $row) {
+            $authGroupsUserId[] = $row->user_id;
+        }
+
+        $user = $this->userBuilder->where('username', $username)->get()->getRow();
+        $userId = $user->id;
+
+        if (!$user && !in_array($userId, $authGroupsUserId)) {
+            return redirect()->route('admin.users')->with('failed', 'Pengguna tidak ditemukan!');
+        }
+
+        if (!empty($user->avatar) && $user->avatar !== 'default-img-avatar.svg') {
+            $avatarPath = FCPATH . 'img/uploads/avatar/' . $user->avatar;
+            if (file_exists($avatarPath)) {
+                @unlink($avatarPath);
+            }
+        }
+
+        $this->userBuilder->where('username', $username)->delete();
+        $query = $this->request->getServer('QUERY_STRING');
+        $url = route_to('admin.users.index') . ($query ? '?' . $query : '');
+        return redirect()->to($url)->with('success', 'Pengguna berhasil dihapus!');
+    }
+    
     // Order Controller
     public function orders()
     {
@@ -323,6 +371,7 @@ class AdminController extends BaseController
         }
     }
 
+    // Report
     public function reports()
     {
         $startDate = $this->request->getGet('start_date');

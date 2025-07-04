@@ -24,6 +24,7 @@ class CreateKebayaTable extends Migration
             'nama_kebaya' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '255',
+                'unique' => true
             ],
             'slug' => [
                 'type'       => 'VARCHAR',
@@ -37,11 +38,11 @@ class CreateKebayaTable extends Migration
             'ukuran_tersedia' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '100',
-                'comment'   => 'S,M,L,XL atau All Size',
+                'comment'   => 'S,M,L,XL atau Semua Ukuran',
             ],
             'harga_sewa' => [
-                'type'       => 'DECIMAL',
-                'constraint' => '12,2',
+                'type'       => 'INT',
+                'constraint' => '11',
             ],
             'stok' => [
                 'type'       => 'INT',
@@ -51,6 +52,8 @@ class CreateKebayaTable extends Migration
             'foto' => [
                 'type'       => 'VARCHAR',
                 'constraint' => '255',
+                'default' => 'default.png',
+                'null' => true,
             ],
             'status' => [
                 'type'       => 'ENUM',
@@ -61,7 +64,7 @@ class CreateKebayaTable extends Migration
                 'type'       => 'TINYINT',
                 'constraint' => 1,
                 'default'    => 0,
-                'comment'    => '0: tidak featured, 1: featured',
+                'comment'    => '0: tidak rekomendasi, 1: rekomendasi',
             ],
         ]);
 
