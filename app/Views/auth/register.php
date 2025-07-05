@@ -1,7 +1,7 @@
 <?= $this->extend('layouts/auth/app'); ?>
 
 <?= $this->section('page_title'); ?>
-Tektok Adventure | Halaman Daftar
+Yanti Kebaya | Halaman Daftar
 <?= $this->endSection(); ?>
 
 <?= $this->section('content'); ?>

@@ -51,7 +51,7 @@
                                         <?= $cart->nama_kebaya ?>
                                     </h2>
                                 </td>
-                                <td>Rp<?= number_format($cart->harga_sewa, '0', '.', ',') ?></td>
+                                <td>Rp<?= number_format($cart->harga_sewa, '0', '.', ',') ?>/hari</td>
                                 <td>
                                     <div class="input-group mb-3 d-flex align-items-center quantity-container" style="max-width: 120px">
                                         <div class="input-group-prepend">
@@ -95,7 +95,7 @@
         </div>
 
         <?= form_open(base_url(route_to('landing.cart.payment.create')), ['class' => 'row']) ?>
-        <div class="col-12 col-lg-7 mb-5 mb-md-0">
+        <div class="col-12 col-lg-6 mb-5 mb-md-0">
             <h2 class="h3 mb-3 text-black">Rincian Pengiriman</h2>
             <div class="p-3 p-lg-5 border bg-white">
 
@@ -144,7 +144,7 @@
                 <div class="row">
                     <div class="col-12 col-md-6 form-group mb-3">
                         <label for="rent_date" class="text-black">Tanggal Sewa <span class="text-danger">*</span></label>
-                        <input type="date" class="form-control <?= session('errors.tanggal_sewa') ? 'is-invalid' : '' ?>" id="rent_date" name="tanggal_sewa" placeholder="Tulis namamu di sini" value="<?= old('tanggal_sewa') ?>">
+                        <input type="date" class="form-control <?= session('errors.tanggal_sewa') ? 'is-invalid' : '' ?>" id="rent_date" name="tanggal_sewa" placeholder="Tulis namamu di sini" value="<?= old('tanggal_sewa') ?>" min="<?= date('Y-m-d') ?>">
                         <?php if (session('errors.tanggal_sewa')) : ?>
                             <div class="invalid-feedback">
                                 <?= session('errors.tanggal_sewa') ?>
@@ -170,9 +170,9 @@
             </div>
         </div>
 
-        <input type="hidden" name="total_bayar" value="<?= $cartsTotalAmount ?>">
+        <input type="hidden" name="total_bayar" id="cartsTotalAmout" value="<?= $cartsTotalAmount ?>">
 
-        <div class="col-12 col-lg-5">
+        <div class="col-12 col-lg-6">
             <div class="row">
                 <div class="col-md-12">
                     <h2 class="h3 mb-3 text-black">Pesananmu</h2>
@@ -180,6 +180,7 @@
                         <table class="table site-block-order-table mb-5">
                             <thead>
                                 <th>Produk</th>
+                                <th>Hari</th>
                                 <th>Total</th>
                             </thead>
                             <tbody>
@@ -188,12 +189,14 @@
                                         <input type="hidden" name="product_id[]" value="<?= $cart->idKebaya ?>">
                                         <input type="hidden" name="quantity[]" value="<?= $cart->kuantitas ?>">
                                         <td><?= $cart->nama_kebaya ?> <strong class="mx-2">x</strong> <?= $cart->kuantitas ?></td>
-                                        <td>Rp<?= number_format($cart->harga_sewa, '0', '.', ',') ?></td>
+                                        <td></td>
+                                        <td>Rp<?= number_format($cart->harga_sewa, '0', '.', ',') ?>/hari</td>
                                     </tr>
                                 <?php endforeach; ?>
                                 <tr>
                                     <td class="text-black font-weight-bold"><strong>Total Pesanan</strong></td>
-                                    <td class="text-black font-weight-bold" colspan="2"><strong>Rp<?= number_format($cartsTotalAmount, '0', '.', ',') ?></strong></td>
+                                    <td id="dayShow">1</td>
+                                    <td class="text-black font-weight-bold" colspan="2" id="displayTotalPay"><strong>Rp<?= number_format($cartsTotalAmount, '0', '.', ',') ?></strong></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1314,6 +1317,12 @@
     document.addEventListener('DOMContentLoaded', function() {
         const rentDate = document.getElementById('rent_date');
         const returnDate = document.getElementById('return_date');
+        const cartsTotalAmountInput = document.getElementById('cartsTotalAmout');
+        const totalDisplay = document.querySelector('#displayTotalPay');
+        const dayDisplay = document.querySelector('#dayShow');
+        const baseTotal = parseInt(cartsTotalAmountInput.value);
+        const perDayFee = 20000;
+
         function handleRentDateChange() {
             if (rentDate.value) {
                 returnDate.disabled = false;
@@ -1326,8 +1335,33 @@
                 returnDate.value = '';
                 returnDate.removeAttribute('min');
             }
+            updateTotalByDays();
         }
+
+        function updateTotalByDays() {
+            let newTotal = baseTotal;
+            if (rentDate.value && returnDate.value) {
+                const start = new Date(rentDate.value);
+                const end = new Date(returnDate.value);
+                const diffTime = end - start;
+                let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays < 1) diffDays = 1;
+                let extraDays = diffDays - 1;
+                if (extraDays < 0) extraDays = 0;
+                newTotal = baseTotal + (perDayFee * extraDays);
+                dayDisplay.textContent = diffDays;
+            }
+            cartsTotalAmountInput.value = newTotal;
+            if (totalDisplay) {
+                totalDisplay.innerHTML = '<strong>Rp' + newTotal.toLocaleString('id-ID', {
+                    maximumFractionDigits: 0,
+                    minimumFractionDigits: 0
+                }) + '</strong>';
+            }
+        }
+
         rentDate.addEventListener('change', handleRentDateChange);
+        returnDate.addEventListener('change', updateTotalByDays);
         handleRentDateChange();
     });
 </script>

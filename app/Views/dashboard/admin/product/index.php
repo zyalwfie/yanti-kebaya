@@ -193,7 +193,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <img id="previewImg" src="<?= base_url('img/product/uploads/') . $product['foto'] ?>" alt="Image" class="w-100 img-thumbnail mb-3">
+                <img id="previewImg" alt="Image" class="w-100 img-thumbnail mb-3">
                 <div class="mb-3">
                     <label for="name" class="form-label">Nama Produk</label>
                     <input class="form-control" id="name" type="text" disabled>
@@ -313,6 +313,12 @@
                 image.src = this.dataset.image;
                 category.value = this.dataset.category_name;
                 description.value = this.dataset.description;
+                console.log(description.value);
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = description.value;
+                const textOnly = tempDiv.textContent || tempDiv.innerText || "";
+                description.value = textOnly;
 
                 if (this.dataset.is_featured == '1') {
                     isFeatured.checked = true;

@@ -192,8 +192,6 @@ class LandingController extends BaseController
         $carts = $this->keranjangModel->where('id_pengguna', user()->id)->findAll();
         $postData = $this->request->getPost();
 
-        // dd($postData);
-
         if (!$this->validateData($postData, $this->sewaModel->getValidationRules(), $this->sewaModel->validationMessages)) {
             return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
         } elseif (!$carts) {

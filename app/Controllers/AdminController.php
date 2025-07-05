@@ -147,6 +147,8 @@ class AdminController extends BaseController
 
         $imageFile = $this->request->getFile('foto');
 
+        // dd($postData, $imageFile);
+        
         $allowedExt = ['jpg', 'jpeg', 'png', 'webp'];
         if ($imageFile->isValid() && !in_array($imageFile->getExtension(), $allowedExt)) {
             return redirect()->back()->withInput()->with('error_image', 'Format gambar tidak valid!');
@@ -164,8 +166,10 @@ class AdminController extends BaseController
             $newName = $imageFile->getRandomName();
             $imageFile->move(FCPATH . 'img/product/uploads/', $newName);
 
-            $postData['image'] = $newName;
+            $postData['foto'] = $newName;
         }
+
+        // dd($postData);
 
         $result = $this->kebayaModel->save($postData);
 
@@ -244,7 +248,7 @@ class AdminController extends BaseController
             return redirect()->route('admin.products.index')->with('failed', 'Produk tidak ditemukan!');
         }
 
-        if (!empty($product['foto']) && file_exists(FCPATH . 'img/product/uploads/' . $product['foto']) && $product['foto'] !== 'img/product/uploads/default.png') {
+        if (!empty($product['foto']) && file_exists(FCPATH . 'img/product/uploads/' . $product['foto']) && $product['foto'] !== 'default.png') {
             @unlink(FCPATH . 'img/product/uploads/' . $product['foto']);
         }
 

@@ -1,7 +1,7 @@
 <?= $this->extend('layouts/auth/app'); ?>
 
 <?= $this->section('page_title'); ?>
-Tektok Adventure | Atur Ulang Sandi
+Yanti Kebaya | Atur Ulang Sandi
 <?= $this->endSection(); ?>
 
 <?= $this->section('content'); ?>

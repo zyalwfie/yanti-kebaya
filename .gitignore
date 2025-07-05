@@ -124,3 +124,7 @@ _modules/*
 
 /results/
 /phpunit*.xml
+
+public/img/product/proof/*
+public/img/product/uploads/*
+!public/img/product/uploads/default.png

@@ -43,6 +43,17 @@
                 <input type="text" class="form-control" id="no_telepon_penyewa" name="no_telepon_penyewa" aria-describedby="phoneHelp" value="<?= $order['no_telepon_penyewa'] ?>" disabled>
             </div>
 
+            <div class="row">
+                <div class="col-12 col-md-6 form-group mb-3">
+                    <label for="rent_date" class="text-black">Tanggal Sewa</label>
+                    <input type="date" class="form-control" id="rent_date" value="<?= $order['tanggal_sewa'] ?>" disabled>
+                </div>
+                <div class="col-12 col-md-6 form-group mb-3 ">
+                    <label for="return_date" class="text-black">Tanggal Pengembalian</label>
+                    <input type="date" class="form-control" id="return_date" value="<?= $order['tanggal_kembali'] ?>" disabled>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="catatan" class="text-black">Catatan</label>
                 <textarea name="catatan" id="catatan" cols="30" rows="5" name="catatan" class="form-control" disabled><?= $order['catatan'] ?></textarea>
@@ -89,12 +100,14 @@
                     <table class="table site-block-order-table mb-5">
                         <thead>
                             <th>Produk</th>
+                            <th>Hari</th>
                             <th>Total</th>
                         </thead>
                         <tbody>
                             <?php foreach ($order_items as $orderItem) : ?>
                                 <tr>
                                     <td><?= $orderItem->nama_kebaya ?> <strong class="mx-2">x</strong> <?= $orderItem->kuantitas ?></td>
+                                    <td></td>
                                     <td>Rp<?= number_format($orderItem->harga_sewa, '0', '.', ',') ?></td>
                                 </tr>
                             <?php endforeach; ?>
@@ -102,6 +115,7 @@
                         <tfoot>
                             <tr>
                                 <td class="text-black font-weight-bold"><strong>Total Pesanan</strong></td>
+                                <td id="dayShow"></td>
                                 <td class="text-black font-weight-bold"><strong>Rp<?= number_format($order['total_bayar'], '0', '.', ',') ?></strong></td>
                             </tr>
                         </tfoot>
@@ -226,7 +240,9 @@
                     }
                 }
             });
-            observer.observe(previewImg, { childList: true });
+            observer.observe(previewImg, {
+                childList: true
+            });
         }
     });
 
@@ -246,5 +262,14 @@
             previewContainer.innerHTML = '<span class="text-danger">File tidak didukung.</span>';
         }
     }
+
+    const dayShow = document.querySelector('#dayShow');
+    const rentDate = document.querySelector('#rent_date');
+    const returnDate = document.querySelector('#return_date');
+    const start = new Date(rentDate.value);
+    const end = new Date(returnDate.value);
+    const diffTime = end - start;
+    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    dayShow.textContent = diffDays;
 </script>
 <?= $this->endSection(); ?>

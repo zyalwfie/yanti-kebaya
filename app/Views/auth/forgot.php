@@ -1,7 +1,7 @@
 <?= $this->extend('layouts/auth/app'); ?>
 
 <?= $this->section('page_title'); ?>
-Tektok Adventure | Lupa Sandi
+Yanti Kebaya | Lupa Sandi
 <?= $this->endSection(); ?>
 
 <?= $this->section('content'); ?>
