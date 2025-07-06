@@ -16,7 +16,7 @@
                     $tanggalKembali = $_GET['tanggal_kembali'] ?? '';
                     $filteredOrder = $orders;
                     if ($category) {
-                        $filteredOrder = array_filter($orders, function ($order) use ($category) {
+                        $filteredOrder = array_filter($filteredOrder, function ($order) use ($category) {
                             return stripos($order['status_pembayaran'], $category) !== false;
                         });
                     }
@@ -34,7 +34,7 @@
                     <div>
                         <h4 class="card-title">Daftar Pesanan</h4>
                         <p class="card-subtitle">
-                            Semua pesanan yang telah pengguna buat
+                            Semua pesanan yang telah kamu buat
                         </p>
                     </div>
                     <div class="d-flex gap-3 align-items-center">
@@ -67,6 +67,9 @@
                 $totalPages = (int) ceil($total / $perPage);
                 $start = ($page - 1) * $perPage;
                 $paginatedOrders = array_slice($filteredOrder, $start, $perPage);
+
+                // Hitung nomor awal untuk halaman ini
+                $startNumber = $start + 1;
                 ?>
                 <div class="table-responsive mt-4">
                     <table class="table mb-4 text-nowrap varient-table align-middle fs-3">
@@ -76,7 +79,7 @@
                                     #
                                 </th>
                                 <th scope="col" class="px-0 text-muted">
-                                    Nama Penyewa
+                                    Nama Penerima
                                 </th>
                                 <th scope="col" class="px-0 text-muted">
                                     Total Harga
@@ -95,15 +98,14 @@
                         <tbody>
                             <?php if (!$paginatedOrders) : ?>
                                 <tr>
-                                    <th colspan="4" class="text-center">
-                                        Pesanan tidak ditemukan. <a href="<?= route_to('admin.orders.index') ?>" class="text-secondary">Kembali</a>
+                                    <th colspan="6" class="text-center">
+                                        <p>Pesanan tidak ditemukan. <a href="<?= route_to('user.orders.index') ?>" class="text-secondary">Kembali</a></p>
                                     </th>
                                 </tr>
                             <?php else : ?>
-                                <?php $index = 1; ?>
-                                <?php foreach ($paginatedOrders as $order) : ?>
+                                <?php foreach ($paginatedOrders as $index => $order) : ?>
                                     <tr>
-                                        <td><?= $index++ ?></td>
+                                        <td class="px-0"><?= $startNumber + $index ?></td>
                                         <td class="px-0">
                                             <div class="d-flex align-items-center">
                                                 <div>
@@ -120,26 +122,39 @@
                                             <span class="badge <?php if ($order['status_sewa'] === 'disewa') : ?>text-bg-info <?php elseif ($order['status_sewa'] === 'selesai') : ?>text-bg-success<?php endif; ?> text-capitalize"><?= $order['status_sewa'] ?></span>
                                         </td>
                                         <td class="px-0 text-dark fw-medium text-end">
-                                            <a href="<?= route_to('admin.orders.show', $order['id_sewa']) ?>" class="text-info">Lihat</a>
+                                            <a href="<?= route_to('user.orders.show', $order['id_sewa']) ?>" class="text-info">Lihat</a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
-
                         </tbody>
                     </table>
+
+                    <!-- Tampilkan informasi pagination -->
+                    <?php if ($totalPages > 1) : ?>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="text-muted">
+                                Menampilkan <?= $startNumber ?> sampai <?= min($startNumber + count($paginatedOrders) - 1, $total) ?> dari <?= $total ?> data
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
                     <nav aria-label="Page navigation">
                         <ul class="pagination">
                             <li class="page-item<?= $page <= 1 ? ' disabled' : '' ?>">
-                                <a class="page-link" href="?page=<?= $page - 1 ?>"><i class="ti ti-chevron-left"></i></a>
+                                <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $page - 1])) ?>">
+                                    <i class="ti ti-chevron-left"></i>
+                                </a>
                             </li>
                             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                                 <li class="page-item<?= $i == $page ? ' active' : '' ?>">
-                                    <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                    <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>"><?= $i ?></a>
                                 </li>
                             <?php endfor; ?>
                             <li class="page-item<?= $page >= $totalPages ? ' disabled' : '' ?>">
-                                <a class="page-link" href="?page=<?= $page + 1 ?>"><i class="ti ti-chevron-right"></i></a>
+                                <a class="page-link" href="?<?= http_build_query(array_merge($_GET, ['page' => $page + 1])) ?>">
+                                    <i class="ti ti-chevron-right"></i>
+                                </a>
                             </li>
                         </ul>
                     </nav>
@@ -148,18 +163,4 @@
         </div>
     </div>
 </div>
-<?= $this->endSection(); ?>
-
-<?= $this->section('foot_js'); ?>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.querySelector('#formEl');
-        const categorySelect = form.querySelector('#selectEl');
-        if (categorySelect) {
-            categorySelect.addEventListener('change', function() {
-                form.submit();
-            });
-        }
-    });
-</script>
 <?= $this->endSection(); ?>
