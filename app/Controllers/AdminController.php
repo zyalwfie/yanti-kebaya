@@ -321,7 +321,7 @@ class AdminController extends BaseController
 
     public function showOrder($orderId)
     {
-        $this->sewaBuilder->select('id_kebaya_pesanan, nama_kebaya, harga_sewa, foto, kuantitas');
+        $this->sewaBuilder->select('nama_kebaya, harga_sewa, foto, kuantitas');
         $this->sewaBuilder->join('kebaya_pesanan', 'sewa.id_sewa = kebaya_pesanan.id_sewa');
         $this->sewaBuilder->join('kebaya', 'kebaya_pesanan.id_kebaya = kebaya.id_kebaya');
         $this->sewaBuilder->where('kebaya_pesanan.id_sewa', $orderId);
@@ -366,7 +366,8 @@ class AdminController extends BaseController
         if ($status === 'berhasil') {
             foreach ($orders as $order) {
                 $this->kebayaModel->update($order['idKebaya'], [
-                    'stok' => $order['stok'] - $order['kuantitas']
+                    'stok' => $order['stok'] - $order['kuantitas'],
+                    'status' => 'disewa'
                 ]);
             }
             return redirect()->back()->with('proofed', 'Pesanan berhasil disetujui!');

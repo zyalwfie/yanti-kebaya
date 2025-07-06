@@ -80,12 +80,26 @@
                 <?php foreach ($paginatedProducts as $product) : ?>
                     <div class="product-item col-6 col-md-3">
                         <div class="card h-100">
-                            <!-- Badge -->
-                            <div
-                                class="badge position-absolute"
-                                style="top: 0.5rem; right: 0.5rem">
-                                <?= $product['status'] ?>
-                            </div>
+                            <!-- Status -->
+                            <?php if ($product['status'] === 'tersedia') : ?>
+                                <div
+                                    class="badge position-absolute"
+                                    style="top: 0.5rem; right: 0.5rem">
+                                    <?= $product['status'] ?>
+                                </div>
+                            <?php elseif ($product['status'] === 'disewa') : ?>
+                                <div
+                                    class="badge badge-warning position-absolute"
+                                    style="top: 0.5rem; right: 0.5rem">
+                                    <?= $product['status'] ?>
+                                </div>
+                            <?php else : ?>
+                                <div
+                                    class="badge badge-danger position-absolute"
+                                    style="top: 0.5rem; right: 0.5rem">
+                                    <?= $product['status'] ?>
+                                </div>
+                            <?php endif; ?>
                             <!-- Product image-->
                             <img
                                 class="card-img-top"

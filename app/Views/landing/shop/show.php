@@ -25,7 +25,9 @@
 <section class="py-5">
     <div class="container px-4 px-lg-5 my-5">
         <div class="row gx-4 gx-lg-5 align-items-center">
-            <div class="col-md-6"><img class="card-img-top mb-5 mb-md-0" src="<?= base_url('img/product/uploads/') . $product['foto'] ?>" alt="<?= $product['foto'] ?>" /></div>
+            <div class="col-md-6">
+                <img class="card-img-top mb-5 mb-md-0" src="<?= base_url('img/product/uploads/') . $product['foto'] ?>" alt="<?= $product['foto'] ?>" id="showDetailImg" />
+            </div>
             <div class="col-md-6">
                 <div class="small mb-1">Detail Produk</div>
                 <h1 class="display-5 fw-bolder"><?= $product['nama_kebaya'] ?></h1>
@@ -78,7 +80,7 @@
 <section class="py-5 bg-light">
     <div class="container px-4 px-lg-5 mt-5">
         <h2 class="fw-bolder mb-4">Produk terkait</h2>
-        <div class="row g-4 justify-content-center">
+        <div class="row g-4 justify-content-start">
             <?php foreach ($relatedProducts as $product) : ?>
                 <div class="product-item col-6 col-md-3">
                     <div class="card h-100">
@@ -163,5 +165,34 @@
         border-color: var(--accent-color) !important;
         box-shadow: 0 0 0 0.25rem rgba(253, 104, 14, .25) !important;
     }
+
+    #showDetailImg {
+        cursor: pointer;
+    }
 </style>
+<?= $this->endSection(); ?>
+
+<?= $this->section('foot_js'); ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const img = document.getElementById('showDetailImg');
+        let viewer;
+        if (img) {
+            viewer = new Viewer(img, {
+                toolbar: true,
+                navbar: false,
+                title: false,
+                movable: true,
+                zoomable: true,
+                scalable: true,
+                transition: true,
+                fullscreen: true,
+            });
+            img.addEventListener('click', function() {
+                viewer.show();
+            });
+        }
+    });
+</script>
 <?= $this->endSection(); ?>

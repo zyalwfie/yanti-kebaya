@@ -56,6 +56,10 @@ class CreateSewaTable extends Migration
                 'type'       => 'DECIMAL',
                 'constraint' => '12,2',
             ],
+            'status_sewa' => [
+                'type'       => 'ENUM',
+                'constraint' => ['disewa', 'selesai'],
+            ],
             'status_pembayaran' => [
                 'type'       => 'ENUM',
                 'constraint' => ['tertunda', 'berhasil', 'gagal'],

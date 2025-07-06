@@ -23,11 +23,11 @@
         <div class="p-3 p-lg-5 border bg-white">
 
             <div class="form-group mb-3 row">
-                <div class="col">
+                <div class="col-12 col-md-6 mb-3">
                     <label for="nama_penyewa" class="text-black">Nama Penerima</label>
                     <input type="text" class="form-control" id="nama_penyewa" name="nama_penyewa" value="<?= $order['nama_penyewa'] ?>" disabled>
                 </div>
-                <div class="col">
+                <div class="col-12 col-md-6">
                     <label for="surel_penyewa" class="text-black">Email</label>
                     <input type="text" class="form-control" id="surel_penyewa" name="surel_penyewa" value="<?= $order['surel_penyewa'] ?>" disabled>
                 </div>
@@ -56,7 +56,7 @@
 
             <div class="form-group">
                 <label for="catatan" class="text-black">Catatan</label>
-                <textarea name="catatan" id="catatan" cols="30" rows="5" name="catatan" class="form-control" disabled><?= $order['catatan'] ?></textarea>
+                <textarea name="catatan" id="catatan" cols="30" rows="5" name="catatan" class="form-control" disabled><?= $order['catatan'] ? $order['catatan'] : 'Tidak ada catatan!' ?></textarea>
             </div>
 
         </div>
@@ -69,10 +69,15 @@
                     <div class="col">
                         <h2 class="h3 mb-3 text-black">Pesananmu</h2>
                     </div>
-                    <div class="col text-end">
+                    <div class="col d-flex align-items-center justify-content-end gap-2 mb-3">
                         <span class="badge <?php if ($order['status_pembayaran'] === 'tertunda') : ?>text-bg-warning <?php elseif ($order['status_pembayaran'] === 'berhasil') : ?>text-bg-success <?php else: ?>text-bg-danger<?php endif; ?> text-capitalize">
                             <?= $order['status_pembayaran'] ?>
                         </span>
+                        <?php if ($order['status_sewa'] !== 'selesai' && $order['status_pembayaran'] === 'berhasil') : ?>
+                            <span class="badge text-bg-info text-capitalize">
+                                sedang disewa
+                            </span>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="p-3 p-lg-5 border bg-white">
@@ -133,6 +138,11 @@
                                 <?= session('proofed') ?>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
+                        <?php elseif (session()->has('success')) : ?>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <?= session('success') ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -146,51 +156,85 @@
                                 <div class="mb-3">
                                     <p>Gambar di samping adalah bukti pembayaran yang telah diunggah</p>
                                 </div>
-                                <?= form_open_multipart(route_to('landing.cart.payment.update')) ?>
-                                <?= csrf_field() ?>
-                                <div class="mb-3">
-                                    <label for="bukti_pembayaran" class="form-label">File Bukti Pembayaran <span class="text-danger">*</span></label>
-                                    <input class="form-control <?= session('errors.bukti_pembayaran') ? 'is-invalid' : '' ?>" type="file" id="bukti_pembayaran" name="bukti_pembayaran" accept="image/*,application/pdf" onchange="previewProof(event)">
-                                    <?php if (session('errors.bukti_pembayaran')) : ?>
-                                        <div class="invalid-feedback">
-                                            <?= session('errors.bukti_pembayaran') ?>
+                                <?php if ($order['status_pembayaran'] === 'berhasil' && $order['status_sewa'] !== 'selesai') : ?>
+                                    <div class="d-flex flex-column gap-2">
+                                        <button type="button" class="btn btn-primary" disabled>Telah Disetujui</button>
+                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#completeOrder">Selesaikan</button>
+                                    </div>
+                                    <?php elseif($order['status_sewa'] === 'selesai') : ?>
+                                        <div class="d-flex flex-column gap-2">
+                                            <button type="button" class="btn btn-primary" disabled>Telah Disetujui</button>
+                                            <button type="button" class="btn btn-primary" disabled>Telah Selesai</button>
                                         </div>
-                                    <?php endif; ?>
-                                    <input type="hidden" name="id_sewa" value="<?= $order['id_sewa'] ?>">
-                                </div>
-                                <div class="mb-3" id="previewContainer"></div>
-                                <button type="submit" class="btn btn-primary">Perbarui Bukti</button>
-                                <?= form_close() ?>
-                            <?php else : ?>
-                                <?= form_open_multipart(route_to('landing.cart.payment.upload')) ?>
-                                <?= csrf_field() ?>
-                                <div id="previewContainer" class="mb-3">
-                                    <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
-                                        <i class="bi bi-exclamation-octagon"></i>
-                                        <div>
-                                            Belum ada bukti pembayaran!
-                                        </div>
+                                <?php else : ?>
+                                    <?= form_open_multipart(route_to('landing.cart.payment.update')) ?>
+                                    <?= csrf_field() ?>
+                                    <div class="mb-3">
+                                        <label for="bukti_pembayaran" class="form-label">File Bukti Pembayaran <span class="text-danger">*</span></label>
+                                        <input class="form-control <?= session('errors.bukti_pembayaran') ? 'is-invalid' : '' ?>" type="file" id="bukti_pembayaran" name="bukti_pembayaran" accept="image/*,application/pdf" onchange="previewProof(event)">
+                                        <?php if (session('errors.bukti_pembayaran')) : ?>
+                                            <div class="invalid-feedback">
+                                                <?= session('errors.bukti_pembayaran') ?>
+                                            </div>
+                                        <?php endif; ?>
+                                        <input type="hidden" name="id_sewa" value="<?= $order['id_sewa'] ?>">
+                                    </div>
+                                    <div class="mb-3" id="previewContainer"></div>
+                                    <button type="submit" class="btn btn-primary">Perbarui Bukti</button>
+                                    <?= form_close() ?>
+                                <?php endif; ?>
+                            </div>
+                        <?php else : ?>
+                            <?= form_open_multipart(route_to('landing.cart.payment.upload'), ['class' => 'd-flex align-items-stretch flex-column']) ?>
+                            <?= csrf_field() ?>
+                            <div id="previewContainer" class="mb-3">
+                                <div class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+                                    <i class="bi bi-exclamation-octagon"></i>
+                                    <div>
+                                        Belum ada bukti pembayaran!
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <?php if (!$proof_of_payment->bukti_pembayaran) : ?>
-                                        <input type="hidden" name="uri_string" value="<?= uri_string() ?>">
-                                    <?php endif; ?>
-                                    <label for="bukti_pembayaran" class="form-label">File Bukti Pembayaran <span class="text-danger">*</span></label>
-                                    <input class="form-control <?= session('errors.bukti_pembayaran') ? 'is-invalid' : '' ?>" type="file" id="bukti_pembayaran" name="bukti_pembayaran" accept="image/*,application/pdf" onchange="previewProof(event)">
-                                    <?php if (session('errors.bukti_pembayaran')) : ?>
-                                        <div class="invalid-feedback">
-                                            <?= session('errors.bukti_pembayaran') ?>
-                                        </div>
-                                    <?php endif; ?>
-                                    <input type="hidden" name="id_sewa" value="<?= $order['id_sewa'] ?>">
-                                </div>
-                                <button type="submit" class="btn btn-primary">Unggah Bukti</button>
-                                <?= form_close() ?>
-                            <?php endif; ?>
                             </div>
+                            <div class="mb-3">
+                                <input type="hidden" name="uri_string" value="<?= uri_string() ?>">
+                                <label for="bukti_pembayaran" class="form-label">File Bukti Pembayaran <span class="text-danger">*</span></label>
+                                <input class="form-control <?= session('errors.bukti_pembayaran') ? 'is-invalid' : '' ?>" type="file" id="bukti_pembayaran" name="bukti_pembayaran" accept="image/*,application/pdf" onchange="previewProof(event)">
+                                <?php if (session('errors.bukti_pembayaran')) : ?>
+                                    <div class="invalid-feedback">
+                                        <?= session('errors.bukti_pembayaran') ?>
+                                    </div>
+                                <?php endif; ?>
+                                <input type="hidden" name="id_sewa" value="<?= $order['id_sewa'] ?>">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Unggah Bukti</button>
+                            <?= form_close() ?>
+                        <?php endif; ?>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Complete order modal -->
+<div class="modal fade" id="completeOrder" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="completeOrderLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="completeOrderLabel">Selesaikan Pesanan</h1>
+            </div>
+            <div class="modal-body">
+                Apakah kamu yakin ingin menyelesaikan pesanan ini?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <?= form_open(route_to('user.orders.update', $order['id_sewa'])) ?>
+                <?= csrf_field() ?>
+                <?php foreach ($order_items as $order) : ?>
+                    <input type="hidden" name="id_kebaya[]" value="<?= $order->idKebaya ?>">
+                <?php endforeach; ?>
+                <button type="submit" class="btn btn-primary">Ya, Selesaikan</button>
+                <?= form_close() ?>
             </div>
         </div>
     </div>

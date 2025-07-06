@@ -36,7 +36,7 @@
                         </div>
                     <?php endif; ?>
                 </div>
-                <input type="hidden" name="id_pesanan" value="<?= $order_id ?>">
+                <input type="hidden" name="id_sewa" value="<?= $order_id ?>">
                 <div class="d-flex justify-content-end align-items-center gap-2">
                     <a href="<?= base_url(route_to('landing.cart.payment.done')) ?>" class="btn btn-secondary">Lakukan Nanti</a>
                     <button type="submit" class="btn upload-btn">Unggah Bukti</button>

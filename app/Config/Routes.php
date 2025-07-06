@@ -61,6 +61,7 @@ $routes->group('dashboard', ['filter' => 'login'], static function ($routes) {
 
         $routes->get('orders', 'UserController::orders', ['as' => 'user.orders.index']);
         $routes->get('orders/show/(:num)', 'UserController::showOrder/$1', ['as' => 'user.orders.show']);
+        $routes->post('orders/update/(:num)', 'UserController::updateOrder/$1', ['as' => 'user.orders.update']);
 
         $routes->get('profile', 'UserController::profile', ['as' => 'user.profile.index']);
         $routes->get('profile/edit', 'UserController::editProfile', ['as' => 'user.profile.edit']);

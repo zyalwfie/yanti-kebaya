@@ -3,12 +3,13 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Models\KebayaModel;
 use App\Models\SewaModel;
 use Myth\Auth\Models\UserModel;
 
 class UserController extends BaseController
 {
-    protected $sewaModel, $sewaBuilder, $userModel, $db;
+    protected $sewaModel, $sewaBuilder, $userModel, $kebayaModel, $db;
 
     public function __construct()
     {
@@ -16,6 +17,7 @@ class UserController extends BaseController
         $this->sewaBuilder = $this->db->table('sewa');
         $this->sewaModel = new SewaModel();
         $this->userModel = new UserModel();
+        $this->kebayaModel = new KebayaModel();
     }
 
     public function index()
@@ -49,6 +51,7 @@ class UserController extends BaseController
         return view('dashboard/user/index', $data);
     }
 
+    // Orders
     public function orders()
     {
         $data = [
@@ -61,7 +64,7 @@ class UserController extends BaseController
 
     public function showOrder($orderId)
     {
-        $this->sewaBuilder->select('kebaya_pesanan.id_kebaya_pesanan as idKebayaPesanan, kode_sewa, nama_kebaya, total_bayar, foto, harga_sewa, kuantitas');
+        $this->sewaBuilder->select('kebaya_pesanan.id_kebaya as idKebaya, kode_sewa, nama_kebaya, total_bayar, foto, harga_sewa, kuantitas');
         $this->sewaBuilder->join('kebaya_pesanan', 'sewa.id_sewa = kebaya_pesanan.id_sewa');
         $this->sewaBuilder->join('kebaya', 'kebaya_pesanan.id_kebaya = kebaya.id_kebaya');
         $this->sewaBuilder->where('sewa.id_pengguna', user()->id);
@@ -87,6 +90,42 @@ class UserController extends BaseController
         return view('dashboard/user/order/show', $data);
     }
 
+    public function updateOrder($orderId)
+    {
+        $query = $this->sewaBuilder
+            ->select('sewa.id_sewa as idSewa, kebaya.*, kuantitas')
+            ->join('kebaya_pesanan', 'sewa.id_sewa = kebaya_pesanan.id_sewa')
+            ->join('kebaya', 'kebaya.id_kebaya = kebaya_pesanan.id_kebaya')
+            ->where('sewa.id_sewa', $orderId)
+            ->get();
+        $orderItems = $query->getResultObject();
+        $result = [];
+
+        foreach($orderItems as $order) {
+            $kebayaResult = $this->kebayaModel->save([
+                'id_kebaya' => $order->id_kebaya,
+                'status' => 'tersedia',
+                'stok' => $order->stok + $order->kuantitas,
+            ]);
+
+            $sewaResult = $this->sewaModel->save([
+                'id_sewa' => $orderId,
+                'status_sewa' => 'selesai'
+            ]);
+
+            if ($kebayaResult || $sewaResult) {
+                $result['errors'] = 'Pesanan gagal diselesaikan';
+            }
+        }
+
+        if (!$result) {
+            return redirect()->back()->with('errors', $result);
+        } else {
+            return redirect()->back()->with('success', 'Pesanan berhasil diselesaikan!');
+        }
+    }
+
+    // Profile
     public function profile()
     {
         $data = [

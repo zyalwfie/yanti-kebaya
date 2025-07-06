@@ -273,14 +273,14 @@ class LandingController extends BaseController
             return redirect()->back()->withInput()->with('errors', $errors);
         }
 
+        $paymentData = $this->pembayaranModel->where('id_sewa', $orderId)->first();
         $newName = $file->getRandomName();
-        $file->move(FCPATH . 'img/product/proof/', $newName);
-
-        $payment = $this->pembayaranModel->where('id_sewa', $orderId)->first();
-        if ($payment) {
-            $this->pembayaranModel->update($payment['id_pembayaran'], [
-                'bukti_pembayaran' => $newName
-            ]);
+        $this->pembayaranModel->update($paymentData['id_pembayaran'], [
+            'bukti_pembayaran' => $newName
+        ]);
+        
+        if ($paymentData) {
+            $file->move(FCPATH . 'img/product/proof/', $newName);
         }
 
         if ($uriString === 'dashboard/user/orders/show/' . $orderId) {
