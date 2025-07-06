@@ -15,7 +15,7 @@
                 <h2 style="text-shadow: 1px 1px 2px #000000;" class="text-white display-4">Terima Kasih</h2>
                 <p style="text-shadow: 1px 1px 2px #000000;" class="text-white">Pesanan kamu sedang diproses, mohon dicek kembali bukti pembayaran</p>
                 <div class="d-flex gap-2 align-items-center justify-content-center">
-                    <a href="<?= base_url() ?>" class="btn-get-started">Beranda</a>
+                    <a href="<?= route_to('landing.shop.index') ?>" class="btn-get-started">Kembali Lihat Koleksi</a>
                     <a href="<?= route_to('user.orders.index') ?>" class="btn-get-started">Cek Pesanan</a>
                 </div>
             </div>

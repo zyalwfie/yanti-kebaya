@@ -73,13 +73,19 @@
                         <thead>
                             <tr>
                                 <th scope="col" class="px-0 text-muted">
+                                    #
+                                </th>
+                                <th scope="col" class="px-0 text-muted">
                                     Nama Penyewa
                                 </th>
                                 <th scope="col" class="px-0 text-muted">
                                     Total Harga
                                 </th>
                                 <th scope="col" class="px-0 text-muted">
-                                    Status
+                                    Status Pembayaran
+                                </th>
+                                <th scope="col" class="px-0 text-muted">
+                                    Status Penyewaan
                                 </th>
                                 <th scope="col" class="px-0 text-muted text-end">
                                     Aksi
@@ -94,8 +100,10 @@
                                     </th>
                                 </tr>
                             <?php else : ?>
+                                <?php $index = 1; ?>
                                 <?php foreach ($paginatedOrders as $order) : ?>
                                     <tr>
+                                        <td><?= $index++ ?></td>
                                         <td class="px-0">
                                             <div class="d-flex align-items-center">
                                                 <div>
@@ -107,6 +115,9 @@
                                         <td class="px-0">Rp<?= number_format($order['total_bayar'], '0', '.', ',') ?></td>
                                         <td class="px-0">
                                             <span class="badge <?php if ($order['status_pembayaran'] === 'tertunda') : ?>text-bg-warning <?php elseif ($order['status_pembayaran'] === 'berhasil') : ?>text-bg-success <?php else: ?>text-bg-danger<?php endif; ?> text-capitalize"><?= $order['status_pembayaran'] ?></span>
+                                        </td>
+                                        <td class="px-0">
+                                            <span class="badge <?php if ($order['status_sewa'] === 'disewa') : ?>text-bg-info <?php elseif ($order['status_sewa'] === 'selesai') : ?>text-bg-success<?php endif; ?> text-capitalize"><?= $order['status_sewa'] ?></span>
                                         </td>
                                         <td class="px-0 text-dark fw-medium text-end">
                                             <a href="<?= route_to('admin.orders.show', $order['id_sewa']) ?>" class="text-info">Lihat</a>

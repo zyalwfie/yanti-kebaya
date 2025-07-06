@@ -148,7 +148,7 @@ class AdminController extends BaseController
         $imageFile = $this->request->getFile('foto');
 
         // dd($postData, $imageFile);
-        
+
         $allowedExt = ['jpg', 'jpeg', 'png', 'webp'];
         if ($imageFile->isValid() && !in_array($imageFile->getExtension(), $allowedExt)) {
             return redirect()->back()->withInput()->with('error_image', 'Format gambar tidak valid!');
@@ -305,7 +305,7 @@ class AdminController extends BaseController
         $url = route_to('admin.users.index') . ($query ? '?' . $query : '');
         return redirect()->to($url)->with('success', 'Pengguna berhasil dihapus!');
     }
-    
+
     // Order Controller
     public function orders()
     {
@@ -355,7 +355,7 @@ class AdminController extends BaseController
             ->where('kebaya_pesanan.id_sewa', $orderId)
             ->get();
 
-        $orders = $query->getResultArray();
+        $orderItems = $query->getResultArray();
 
         $status = $this->request->getPost('status');
 
@@ -364,7 +364,7 @@ class AdminController extends BaseController
         ]);
 
         if ($status === 'berhasil') {
-            foreach ($orders as $order) {
+            foreach ($orderItems as $order) {
                 $this->kebayaModel->update($order['idKebaya'], [
                     'stok' => $order['stok'] - $order['kuantitas'],
                     'status' => 'disewa'
@@ -372,6 +372,16 @@ class AdminController extends BaseController
             }
             return redirect()->back()->with('proofed', 'Pesanan berhasil disetujui!');
         } else {
+            foreach ($orderItems as $order) {
+                $this->kebayaModel->update($order['idKebaya'], [
+                    'stok' => $order['stok'] - $order['kuantitas'],
+                    'status' => 'tersedia'
+                ]);
+            }
+            $this->sewaModel->save([
+                'id_sewa' => $orderId,
+                'status_sewa' => 'selesai'
+            ]);
             return redirect()->back()->with('proofed', 'Pesanan berhasil dibatalkan!');
         }
     }
@@ -418,8 +428,7 @@ class AdminController extends BaseController
         $endDate = $this->request->getGet('end_date');
 
         $this->sewaBuilder->select('sewa.*, users.email as surelPenyewa')
-            ->join('users', 'users.id = sewa.id_pengguna')
-            ->where('sewa.status_pembayaran', 'berhasil');
+            ->join('users', 'users.id = sewa.id_pengguna');
 
         if ($startDate) {
             $this->sewaBuilder->where('sewa.waktu_dibuat >=', $startDate);
@@ -456,9 +465,8 @@ class AdminController extends BaseController
         $endDate = $this->request->getGet('end_date');
 
         $this->sewaBuilder->select('sewa.*, users.email as surelPenyewa')
-            ->join('users', 'users.id = sewa.id_pengguna')
-            ->where('sewa.status_pembayaran', 'berhasil');
-
+            ->join('users', 'users.id = sewa.id_pengguna');
+            
         if ($startDate) {
             $this->sewaBuilder->where('sewa.waktu_dibuat >=', $startDate);
         }
@@ -477,6 +485,11 @@ class AdminController extends BaseController
         $options->set('defaultFont', 'Helvetica');
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isRemoteEnabled', true);
+        $options->set('margin_top', 10);
+        $options->set('margin_right', 10);
+        $options->set('margin_bottom', 10);
+        $options->set('margin_left', 10);
+        $options->set('dpi', 96);
 
         $dompdf = new Dompdf($options);
 
@@ -484,19 +497,19 @@ class AdminController extends BaseController
 
         $dompdf->loadHtml($html);
 
-        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->setPaper('A4', 'portrait');
 
         $dompdf->render();
 
-        $filename = 'Laporan_Penjualan_';
+        $filename = 'Laporan Penyewaan Yanti Kebaya';
         if ($startDate && $endDate) {
-            $filename .= date('d_m_Y', strtotime($startDate)) . '_to_' . date('d_m_Y', strtotime($endDate));
+            $filename .= date('d_m_Y', strtotime($startDate)) . ' Sampai ' . date('d_m_Y', strtotime($endDate));
         } elseif ($startDate) {
-            $filename .= 'dari_' . date('d_m_Y', strtotime($startDate));
+            $filename .= 'Dari ' . date('d_m_Y', strtotime($startDate));
         } elseif ($endDate) {
-            $filename .= 'sampai_' . date('d_m_Y', strtotime($endDate));
+            $filename .= 'Sampai ' . date('d_m_Y', strtotime($endDate));
         } else {
-            $filename .= 'semua_periode';
+            $filename .= 'Semua Periode';
         }
         $filename .= '.pdf';
 
@@ -506,113 +519,131 @@ class AdminController extends BaseController
     private function generatePdfContent($orders, $totalSales, $startDate = null, $endDate = null)
     {
         $html = '
-        <!DOCTYPE html>
-        <html lang="id">
-        <head>
-            <meta charset="UTF-8">
-            <title>Laporan Penjualan</title>
-            <style>
-                body { 
-                    font-family: Helvetica, Arial, sans-serif; 
-                    font-size: 10pt;
-                    margin: 0;
-                    padding: 20px;
-                }
-                .report-header { 
-                    text-align: center; 
-                    margin-bottom: 20px;
-                    border-bottom: 2px solid #000;
-                    padding-bottom: 10px;
-                }
-                .report-header h1 { 
-                    margin: 0; 
-                    color: #333;
-                    font-size: 24pt;
-                }
-                .report-header p { 
-                    margin: 5px 0; 
-                    color: #666;
-                    font-size: 12pt;
-                }
-                .company-info {
-                    text-align: center;
-                    margin-bottom: 10px;
-                }
-                .company-info p {
-                    margin: 2px 0;
-                    font-size: 9pt;
-                    color: #555;
-                }
-                .total-sales {
-                    background-color: #f0f0f0;
-                    padding: 15px;
-                    text-align: center;
-                    margin-bottom: 20px;
-                    font-weight: bold;
-                    border: 1px solid #ddd;
-                    border-radius: 5px;
-                }
-                .total-sales h3 {
-                    margin: 0 0 5px 0;
-                    color: #333;
-                }
-                .total-sales .amount {
-                    font-size: 18pt;
-                    color: #28a745;
-                }
-                table { 
-                    width: 100%; 
-                    border-collapse: collapse; 
-                    margin-bottom: 20px; 
-                }
-                table th, table td { 
-                    border: 1px solid #ddd; 
-                    padding: 8px;
-                    text-align: left;
-                }
-                th { 
-                    background-color: #f8f8f8;
-                    font-weight: bold;
-                    color: #333;
-                }
-                tr:nth-child(even) {
-                    background-color: #f9f9f9;
-                }
-                .text-center {
-                    text-align: center;
-                }
-                .text-right {
-                    text-align: right;
-                }
-                .footer {
-                    font-size: 8pt;
-                    text-align: center;
-                    color: #666;
-                    margin-top: 30px;
-                    padding-top: 10px;
-                    border-top: 1px solid #ddd;
-                }
-                .summary-info {
-                    margin-bottom: 20px;
-                    padding: 10px;
-                    background-color: #f5f5f5;
-                    border-radius: 5px;
-                }
-                .summary-info p {
-                    margin: 5px 0;
-                    font-size: 10pt;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="company-info">
-                <p><strong>Yanti Kebaya</strong></p>
-                <p>Desa Rumak, Lombok Barat, NTB 83370</p>
-                <p>+62 823-3954-4560 | yantikebaya@business.com</p>
-            </div>
-            
-            <div class="report-header">
-                <h1>Laporan Penjualan</h1>';
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <title>Laporan Penjualan</title>
+        <style>
+            @page {
+                size: A4;
+                margin: 1cm;
+            }
+            body { 
+                font-family: Helvetica, Arial, sans-serif; 
+                font-size: 9pt;
+                margin: 0;
+                padding: 0;
+                line-height: 1.3;
+            }
+            .report-header { 
+                text-align: center; 
+                margin-bottom: 15px;
+                border-bottom: 2px solid #000;
+                padding-bottom: 8px;
+            }
+            .report-header h1 { 
+                margin: 0; 
+                color: #333;
+                font-size: 18pt;
+            }
+            .report-header p { 
+                margin: 3px 0; 
+                color: #666;
+                font-size: 10pt;
+            }
+            .company-info {
+                text-align: center;
+                margin-bottom: 8px;
+            }
+            .company-info p {
+                margin: 1px 0;
+                font-size: 8pt;
+                color: #555;
+            }
+            .total-sales {
+                background-color: #f0f0f0;
+                padding: 10px;
+                text-align: center;
+                margin-bottom: 15px;
+                font-weight: bold;
+                border: 1px solid #ddd;
+                border-radius: 3px;
+            }
+            .total-sales h3 {
+                margin: 0 0 3px 0;
+                color: #333;
+                font-size: 12pt;
+            }
+            .total-sales .amount {
+                font-size: 14pt;
+                color: #28a745;
+            }
+            table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                margin-bottom: 15px; 
+                font-size: 8pt;
+            }
+            table th, table td { 
+                border: 1px solid #ddd; 
+                padding: 4px;
+                text-align: left;
+                vertical-align: top;
+            }
+            th { 
+                background-color: #f8f8f8;
+                font-weight: bold;
+                color: #333;
+                font-size: 8pt;
+            }
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            .text-center {
+                text-align: center;
+            }
+            .text-right {
+                text-align: right;
+            }
+            .footer {
+                font-size: 7pt;
+                text-align: center;
+                color: #666;
+                margin-top: 20px;
+                padding-top: 8px;
+                border-top: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+            .summary-info {
+                margin-bottom: 15px;
+                padding: 8px;
+                background-color: #f5f5f5;
+                border-radius: 3px;
+                font-size: 8pt;
+            }
+            .summary-info p {
+                margin: 2px 0;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            /* Responsive table untuk A4 */
+            .table-responsive {
+                width: 100%;
+                overflow-x: visible;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="company-info">
+            <p><strong>Yanti Kebaya</strong></p>
+            <p>Desa Rumak, Lombok Barat, NTB 83370</p>
+            <p>+62 823-3954-4560 | yantikebaya@business.com</p>
+        </div>
+        
+        <div class="report-header">
+            <h1>Laporan Penjualan</h1>';
 
         if ($startDate && $endDate) {
             $html .= "<p>Periode: " . date('d F Y', strtotime($startDate)) . " - " . date('d F Y', strtotime($endDate)) . "</p>";
@@ -625,24 +656,27 @@ class AdminController extends BaseController
         }
 
         $html .= '
-            </div>
-            
-            <div class="total-sales">
-                <h3>Total Penjualan</h3>
-                <div class="amount">Rp ' . number_format($totalSales, 0, ',', '.') . '</div>
-            </div>
-            
-            <div class="summary-info">
-                <p><strong>Ringkasan Laporan:</strong></p>
-                <p>Total Transaksi: ' . count($orders) . ' pesanan</p>
-                <p>Status: Semua transaksi berhasil</p>
-            </div>
+        </div>
+        
+        <div class="total-sales">
+            <h3>Total Penjualan</h3>
+            <div class="amount">Rp ' . number_format($totalSales, 0, ',', '.') . '</div>
+        </div>
+        
+        <div class="summary-info">
+            <p><strong>Ringkasan Laporan:</strong></p>
+            <p>Total Transaksi: ' . count($orders) . ' pesanan</p>
+            <p>Status: Semua transaksi berhasil</p>
+        </div>
 
+        <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
                         <th class="text-center" width="5%">No</th>
-                        <th width="15%">Tanggal</th>
+                        <th width="15%">Tanggal Dibuat</th>
+                        <th width="15%">Tanggal Sewa</th>
+                        <th width="15%">Tanggal Pengembalian</th>
                         <th width="25%">Nama Penerima</th>
                         <th width="25%">Email</th>
                         <th width="15%">No. Telepon</th>
@@ -653,33 +687,36 @@ class AdminController extends BaseController
 
         if (empty($orders)) {
             $html .= '
-                <tr>
-                    <td colspan="6" class="text-center">Tidak ada data penjualan yang ditemukan.</td>
-                </tr>';
+            <tr>
+                <td colspan="6" class="text-center">Tidak ada data penjualan yang ditemukan.</td>
+            </tr>';
         } else {
             foreach ($orders as $index => $order) {
                 $html .= "
-                <tr>
-                    <td class='text-center'>" . ($index + 1) . "</td>
-                    <td>" . date('d/m/Y', strtotime($order['waktu_dibuat'])) . "</td>
-                    <td>" . htmlspecialchars($order['nama_penyewa']) . "</td>
-                    <td>" . htmlspecialchars($order['surel_penyewa']) . "</td>
-                    <td>" . htmlspecialchars($order['no_telepon_penyewa'] ?? '-') . "</td>
-                    <td class='text-right'>Rp " . number_format($order['total_bayar'], 0, ',', '.') . "</td>
-                </tr>";
+            <tr>
+                <td class='text-center'>" . ($index + 1) . "</td>
+                <td>" . date('d/m/Y', strtotime($order['waktu_dibuat'])) . "</td>
+                <td>" . date('d/m/Y', strtotime($order['tanggal_sewa'])) . "</td>
+                <td>" . date('d/m/Y', strtotime($order['tanggal_kembali'])) . "</td>
+                <td>" . htmlspecialchars($order['nama_penyewa']) . "</td>
+                <td>" . htmlspecialchars($order['surel_penyewa']) . "</td>
+                <td>" . htmlspecialchars($order['no_telepon_penyewa'] ?? '-') . "</td>
+                <td class='text-right'>Rp " . number_format($order['total_bayar'], 0, ',', '.') . "</td>
+            </tr>";
             }
         }
 
         $html .= '
                 </tbody>
             </table>
-            
-            <div class="footer">
-                <p>Laporan ini dicetak pada: ' . date('d F Y H:i:s') . '</p>
-                <p>© ' . date('Y') . ' Yanti Kebaya - Laporan Penjualan</p>
-            </div>
-        </body>
-        </html>';
+        </div>
+        
+        <div class="footer">
+            <p>Laporan ini dicetak pada: ' . date('d F Y H:i:s') . '</p>
+            <p>© ' . date('Y') . ' Yanti Kebaya - Laporan Penjualan</p>
+        </div>
+    </body>
+    </html>';
 
         return $html;
     }

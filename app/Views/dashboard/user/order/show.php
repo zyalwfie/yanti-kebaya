@@ -161,11 +161,10 @@
                                         <button type="button" class="btn btn-primary" disabled>Telah Disetujui</button>
                                         <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#completeOrder">Selesaikan</button>
                                     </div>
-                                    <?php elseif($order['status_sewa'] === 'selesai') : ?>
-                                        <div class="d-flex flex-column gap-2">
-                                            <button type="button" class="btn btn-primary" disabled>Telah Disetujui</button>
-                                            <button type="button" class="btn btn-primary" disabled>Telah Selesai</button>
-                                        </div>
+                                <?php elseif ($order['status_sewa'] === 'selesai') : ?>
+                                    <div class="d-flex flex-column gap-2">
+                                        <button type="button" class="btn btn-primary" disabled>Telah Selesai</button>
+                                    </div>
                                 <?php else : ?>
                                     <?= form_open_multipart(route_to('landing.cart.payment.update')) ?>
                                     <?= csrf_field() ?>
@@ -230,9 +229,6 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                 <?= form_open(route_to('user.orders.update', $order['id_sewa'])) ?>
                 <?= csrf_field() ?>
-                <?php foreach ($order_items as $order) : ?>
-                    <input type="hidden" name="id_kebaya[]" value="<?= $order->idKebaya ?>">
-                <?php endforeach; ?>
                 <button type="submit" class="btn btn-primary">Ya, Selesaikan</button>
                 <?= form_close() ?>
             </div>

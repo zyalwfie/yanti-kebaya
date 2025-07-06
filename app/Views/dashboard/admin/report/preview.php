@@ -73,7 +73,9 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Tanggal</th>
+                                <th>Tanggal Dibuat</th>
+                                <th>Tanggal Disewa</th>
+                                <th>Tanggal Pengembalian</th>
                                 <th>Nama Penerima</th>
                                 <th>Email</th>
                                 <th>Total Harga</th>
@@ -92,6 +94,8 @@
                                     <tr>
                                         <td><?= $index + 1 ?></td>
                                         <td><?= date('d M Y', strtotime($order['waktu_dibuat'])) ?></td>
+                                        <td><?= date('d M Y', strtotime($order['tanggal_sewa'])) ?></td>
+                                        <td><?= date('d M Y', strtotime($order['tanggal_kembali'])) ?></td>
                                         <td><?= htmlspecialchars($order['nama_penyewa']) ?></td>
                                         <td><?= htmlspecialchars($order['surel_penyewa']) ?></td>
                                         <td>Rp<?= number_format($order['total_bayar'], 0, ',', '.') ?></td>

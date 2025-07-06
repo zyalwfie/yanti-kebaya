@@ -14,7 +14,7 @@
             <div class="col-lg-8">
                 <h2 style="text-shadow: 1px 1px 2px #000000;" class="text-white display-4">Keranjang Belanja</h2>
                 <p style="text-shadow: 1px 1px 2px #000000;" class="text-white">Di bawah ini daftar semua produk yang kamu tambah ke keranjang belanja.</p>
-                <a href="<?= route_to('landing.shop.index') ?>" class="btn-get-started text-decoration-none mt-2">Kembali Belanja</a>
+                <a href="<?= route_to('landing.shop.index') ?>" class="btn-get-started text-decoration-none mt-2">Kembali Lihat Koleksi</a>
             </div>
         </div>
     </div>

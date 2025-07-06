@@ -83,19 +83,19 @@
                             <!-- Status -->
                             <?php if ($product['status'] === 'tersedia') : ?>
                                 <div
-                                    class="badge position-absolute"
+                                    class="badge position-absolute text-capitalize"
                                     style="top: 0.5rem; right: 0.5rem">
                                     <?= $product['status'] ?>
                                 </div>
                             <?php elseif ($product['status'] === 'disewa') : ?>
                                 <div
-                                    class="badge badge-warning position-absolute"
+                                    class="badge text-bg-info position-absolute text-capitalize"
                                     style="top: 0.5rem; right: 0.5rem">
                                     <?= $product['status'] ?>
                                 </div>
                             <?php else : ?>
                                 <div
-                                    class="badge badge-danger position-absolute"
+                                    class="badge text-bg-danger position-absolute text-capitalize"
                                     style="top: 0.5rem; right: 0.5rem">
                                     <?= $product['status'] ?>
                                 </div>

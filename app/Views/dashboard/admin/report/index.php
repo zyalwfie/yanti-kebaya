@@ -72,7 +72,7 @@
                                                 'start_date' => $startDate,
                                                 'end_date' => $endDate
                                             ]) ?>" class="btn btn-success">
-                                    <i class="bi bi-eye"></i> Pratinjau
+                                    Pratinjau
                                 </a>
                             <?php endif; ?>
                         </div>
@@ -97,7 +97,9 @@
                         <table class="table mb-4 text-nowrap varient-table align-middle fs-3">
                             <thead>
                                 <tr>
-                                    <th scope="col" class="px-0 text-muted">Tanggal</th>
+                                    <th scope="col" class="px-0 text-muted">Tanggal Dibuat</th>
+                                    <th scope="col" class="px-0 text-muted">Tanggal Disewa</th>
+                                    <th scope="col" class="px-0 text-muted">Tanggal Pengembalian</th>
                                     <th scope="col" class="px-0 text-muted">Nama Penerima</th>
                                     <th scope="col" class="px-0 text-muted">Total Harga</th>
                                     <th scope="col" class="px-0 text-muted">Status</th>
@@ -116,6 +118,12 @@
                                         <tr>
                                             <td class="px-0">
                                                 <?= date('d M Y', strtotime($order['waktu_dibuat'])) ?>
+                                            </td>
+                                            <td class="px-0">
+                                                <?= date('d M Y', strtotime($order['tanggal_sewa'])) ?>
+                                            </td>
+                                            <td class="px-0">
+                                                <?= date('d M Y', strtotime($order['tanggal_kembali'])) ?>
                                             </td>
                                             <td class="px-0">
                                                 <div class="d-flex align-items-center">

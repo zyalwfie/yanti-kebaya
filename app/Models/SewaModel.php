@@ -23,6 +23,7 @@ class SewaModel extends Model
         'tanggal_sewa',
         'tanggal_kembali',
         'total_bayar',
+        'status_sewa',
         'status_pembayaran',
     ];
 

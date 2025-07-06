@@ -36,6 +36,7 @@ class UserController extends BaseController
             ->select('nama_penyewa, no_telepon_penyewa, avatar, status_pembayaran, total_bayar')
             ->join('users', 'sewa.id_pengguna = users.id')
             ->where('sewa.id_pengguna', user()->id)
+            ->orderBy('waktu_dibuat', 'desc')
             ->get(4);
         $orders = $query->getResult();
 
@@ -99,27 +100,38 @@ class UserController extends BaseController
             ->where('sewa.id_sewa', $orderId)
             ->get();
         $orderItems = $query->getResultObject();
-        $result = [];
 
-        foreach($orderItems as $order) {
+        $hasError = false;
+        $errorMessage = '';
+
+        foreach ($orderItems as $orderItem) {
             $kebayaResult = $this->kebayaModel->save([
-                'id_kebaya' => $order->id_kebaya,
+                'id_kebaya' => $orderItem->id_kebaya,
                 'status' => 'tersedia',
-                'stok' => $order->stok + $order->kuantitas,
+                'stok' => $orderItem->stok + $orderItem->kuantitas,
             ]);
 
+            if (!$kebayaResult) {
+                $hasError = true;
+                $errorMessage = 'Gagal memperbarui data kebaya';
+                break;
+            }
+        }
+
+        if (!$hasError) {
             $sewaResult = $this->sewaModel->save([
                 'id_sewa' => $orderId,
                 'status_sewa' => 'selesai'
             ]);
 
-            if ($kebayaResult || $sewaResult) {
-                $result['errors'] = 'Pesanan gagal diselesaikan';
+            if (!$sewaResult) {
+                $hasError = true;
+                $errorMessage = 'Gagal memperbarui status pesanan';
             }
         }
 
-        if (!$result) {
-            return redirect()->back()->with('errors', $result);
+        if ($hasError) {
+            return redirect()->back()->with('errors', $errorMessage);
         } else {
             return redirect()->back()->with('success', 'Pesanan berhasil diselesaikan!');
         }
